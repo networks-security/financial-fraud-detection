@@ -1,0 +1,46 @@
+@import "../_mixins.scss";
+
+:root {
+  --header-height: 93px;
+}
+
+.header {
+  width: 100%;
+  height: var(--header-height);
+  background-color: var(--bg-white);
+  z-index: 2;
+}
+
+.header > .left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: var(--side-margin-value);
+}
+
+.header > .right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 32px;
+
+  @include regular-text;
+  margin-right: var(--side-margin-value);
+}
+
+// Header Buttons
+%header-button {
+  width: 127px;
+  height: 45px;
+}
+
+.sign-in {
+  @extend %header-button;
+  background-color: var(--focus-dark);
+}
+
+.sign-up {
+  @extend %header-button;
+  background-color: var(--focus-light);
+  color: var(--focus-dark);
+}

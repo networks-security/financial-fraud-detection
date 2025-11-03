@@ -1,0 +1,6 @@
+/* Font classes */
+@mixin regular-text {
+  /* semi-bold */
+  font-weight: 700;
+  font-size: var(--regular-font-size);
+}
