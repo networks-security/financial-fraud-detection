@@ -1,0 +1,45 @@
+@import "../mixins";
+
+.layout {
+  height: 100vh;
+  padding: var(--side-margin-value);
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  // gap: 10px;
+
+  background: var(--bg-gradient);
+}
+
+.left-panel {
+  max-width: 85%;
+}
+
+.left-panel-description {
+  @include thin-text;
+  color: var(--focus-primary);
+  font-size: 24px;
+}
+
+.sign-in {
+  width: 475px;
+  height: 580px;
+
+  border-radius: var(--rounded-corners);
+  background-color: var(--bg-white);
+}
+
+.sign-up {
+  width: 475px;
+  height: 580px;
+
+  border-radius: var(--rounded-corners);
+  background-color: var(--bg-white);
+}
+
+.bank-image {
+  width: 120%;
+  height: 100%;
+  position: relative;
+  left: -100px;
+  top: -150px;
+}

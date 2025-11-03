@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Khula:wght@400;500;600;700&display=swap");
-@import "./_mixins.scss";
+@import "mixins";
 
 :root {
   /* Primarily used for background colors or gradient on the main and auth pages */
@@ -19,6 +19,7 @@
 
   /* Font size */
   --regular-font-size: 20px;
+  --big-font-size: 46px;
   --rounded-corners: 10px;
 
   --side-margin-value: 110px;
@@ -60,6 +61,14 @@ button {
   color: var(--focus-light);
 }
 
+.bold-text {
+  @include bold-text;
+}
+
 .regular-text {
   @include regular-text;
+}
+
+.thin-text {
+  @include thin-text;
 }

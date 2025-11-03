@@ -1,6 +1,18 @@
 /* Font classes */
+@mixin bold-text {
+  /* bold */
+  font-weight: 800;
+  font-size: var(--big-font-size);
+}
+
 @mixin regular-text {
   /* semi-bold */
   font-weight: 700;
+  font-size: var(--regular-font-size);
+}
+
+@mixin thin-text {
+  /* regular */
+  font-weight: 600;
   font-size: var(--regular-font-size);
 }
