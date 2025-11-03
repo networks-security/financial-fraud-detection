@@ -1,33 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Khula:wght@400;500;600;700&display=swap");
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Primarily used for background colors or gradient on the main and auth pages */
+  --bg-top: #ffffff;
+  --bg-bottom: #cbd6fc;
+  --bg-gradient: linear-gradient(to top right, var(--bg-bottom), var(--bg-top));
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  /* General background colors */
+  --bg-white: #ffffff;
+  --bg-light: #f6f8ff; /* Hover background effect (e.g. for icons no white background)*/
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* For main focus elements (text, buttons)*/
+  --focus-primary: #355dee; /* Also for icons in focus */
+  --focus-secondary: #93a8f6;
+  --focus-dark: #000000;
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 a {
@@ -35,8 +27,15 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+body {
+  font-family: "Khula", Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased; /* Improves the appearance of fonts on WebKit-based browsers */
+  -moz-osx-font-smoothing: grayscale; /* Ensures smoother font rendering on macOS for Mozilla-based browsers */
+}
+
+/* Prevent horizontal scrolling and ensure that the content does not exceed the width of the viewport */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
