@@ -18,7 +18,10 @@ export default function Layout({ children }: { children: ReactNode }) {
             <Image
               src="/bank.svg"
               fill
-              style={{ objectFit: "contain" }}
+              style={{
+                objectFit: "contain",
+                maxWidth: "1000px",
+              }}
               alt="Bank Image"
             ></Image>
           </div>
