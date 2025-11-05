@@ -20,16 +20,16 @@
   font-size: 24px;
 }
 
-.sign-in {
+.auth-form {
   width: 475px;
-  height: 580px;
+  height: fit-content;
   padding: 50px;
 
   border-radius: var(--rounded-corners);
   background-color: var(--bg-white);
 }
 
-.sign-in h1 {
+.auth-form h1 {
   @include regular-text;
   width: fit-content;
   margin: auto;
@@ -39,7 +39,7 @@
   font-size: 32px;
 }
 
-.sign-in label {
+.auth-form label {
   display: block;
   @include regular-text;
   color: var(--focus-dark);
@@ -63,11 +63,12 @@
   }
 }
 
-.sign-in input {
+.auth-form input {
   @extend %auth-input-styles;
 }
 
-.sign-in .sign-in-button {
+.auth-form .submit-button {
+  margin-top: 48px;
   @extend %auth-input-styles;
   background-color: var(--focus-primary);
   border-color: var(--focus-primary);
@@ -76,9 +77,8 @@
   color: var(--bg-white);
 }
 
-.create-account {
+.redirect-button {
   @extend %auth-input-styles;
-  margin-bottom: 36px;
   background-color: var(--bg-white);
 
   @include thin-text;
