@@ -1,0 +1,422 @@
+"use client";
+
+import React from "react";
+import { useTable, FilterDropdown } from "@refinedev/antd";
+import { Table, Input } from "antd";
+
+interface Transaction {
+  txFraud: boolean;
+  txFraudScenario: number;
+  transactionId: number;
+  txDatetime: Date;
+  customerId: number;
+  terminalId: number;
+  txAmount: number;
+  txTimeSeconds: number;
+  txTimeDays: number;
+}
+
+// NOTE: Sorting will work when we have a real API that provides the transaction data.
+const TransactionsTable: React.FC = () => {
+  // TODO: Uncomment and implement Data Provider, after the backend is done.
+  // const { tableProps } = useTable<Transaction>({
+  //   resource: "transactions",
+  //   filters: {
+  //     initial: [
+  //       {
+  //         field: "name",
+  //         operator: "contains",
+  //         value: "",
+  //       },
+  //     ],
+  //   },
+  // });
+
+  return (
+    <div style={{ padding: "4px" }}>
+      {/* Uncomment and replace with the next line, after the backend is done.
+      <Table {...tableProps} rowKey="id"> */}
+
+      <Table dataSource={sampleData} rowKey="transactionId">
+        <Table.Column
+          dataIndex="txFraud"
+          title="Fraud"
+          sorter={{ multiple: 1 }}
+          render={(value: boolean) => (
+            <span style={{ color: value ? "red" : "green", fontWeight: 600 }}>
+              {value ? "Fraud" : "Legit"}
+            </span>
+          )}
+        />
+        <Table.Column dataIndex="txFraudScenario" title="Fraud Scenario" />
+        <Table.Column dataIndex="transactionId" title="Transaction ID" />
+        <Table.Column
+          dataIndex="txDatetime"
+          title="Date/Time"
+          render={(value: Date) => new Date(value).toLocaleString()}
+          sorter={{ multiple: 2 }}
+        />
+        <Table.Column
+          dataIndex="customerId"
+          title="Customer ID"
+          filterDropdown={(props) => (
+            <FilterDropdown {...props}>
+              <Input placeholder="Search by ID" type="number" />
+            </FilterDropdown>
+          )}
+        />
+        <Table.Column dataIndex="terminalId" title="Terminal ID" />
+        <Table.Column
+          dataIndex="txAmount"
+          title="Amount"
+          sorter={{ multiple: 3 }}
+        />
+        <Table.Column
+          dataIndex="txTimeSeconds"
+          title="Time (seconds)"
+          sorter={{ multiple: 4 }}
+        />
+        <Table.Column
+          dataIndex="txTimeDays"
+          title="Time (days)"
+          sorter={{ multiple: 5 }}
+        />
+      </Table>
+    </div>
+  );
+};
+
+export default TransactionsTable;
+
+const sampleData: Transaction[] = [
+  {
+    transactionId: 1,
+    txDatetime: new Date("2025-11-08T11:30:00"),
+    customerId: 105,
+    terminalId: 6,
+    txAmount: 30.89,
+    txTimeSeconds: 4690,
+    txTimeDays: 5,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 2,
+    txDatetime: new Date("2025-11-08T08:14:00"),
+    customerId: 104,
+    terminalId: 1,
+    txAmount: 393.59,
+    txTimeSeconds: 4415,
+    txTimeDays: 1,
+    txFraud: true,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 3,
+    txDatetime: new Date("2025-11-08T17:48:00"),
+    customerId: 109,
+    terminalId: 3,
+    txAmount: 168.26,
+    txTimeSeconds: 4270,
+    txTimeDays: 3,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 4,
+    txDatetime: new Date("2025-11-08T08:55:00"),
+    customerId: 101,
+    terminalId: 5,
+    txAmount: 428.99,
+    txTimeSeconds: 2097,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 2,
+  },
+  {
+    transactionId: 5,
+    txDatetime: new Date("2025-11-08T15:24:00"),
+    customerId: 103,
+    terminalId: 9,
+    txAmount: 159.43,
+    txTimeSeconds: 3431,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 6,
+    txDatetime: new Date("2025-11-08T10:05:00"),
+    customerId: 108,
+    terminalId: 4,
+    txAmount: 321.77,
+    txTimeSeconds: 2830,
+    txTimeDays: 4,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 7,
+    txDatetime: new Date("2025-11-08T13:45:00"),
+    customerId: 102,
+    terminalId: 2,
+    txAmount: 211.12,
+    txTimeSeconds: 1340,
+    txTimeDays: 3,
+    txFraud: false,
+    txFraudScenario: 3,
+  },
+  {
+    transactionId: 8,
+    txDatetime: new Date("2025-11-08T18:25:00"),
+    customerId: 110,
+    terminalId: 8,
+    txAmount: 451.25,
+    txTimeSeconds: 2000,
+    txTimeDays: 5,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 9,
+    txDatetime: new Date("2025-11-08T09:50:00"),
+    customerId: 107,
+    terminalId: 6,
+    txAmount: 299.9,
+    txTimeSeconds: 3500,
+    txTimeDays: 2,
+    txFraud: true,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 10,
+    txDatetime: new Date("2025-11-08T12:30:00"),
+    customerId: 106,
+    terminalId: 7,
+    txAmount: 88.45,
+    txTimeSeconds: 2600,
+    txTimeDays: 3,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 11,
+    txDatetime: new Date("2025-11-08T19:10:00"),
+    customerId: 104,
+    terminalId: 1,
+    txAmount: 377.8,
+    txTimeSeconds: 4900,
+    txTimeDays: 1,
+    txFraud: true,
+    txFraudScenario: 2,
+  },
+  {
+    transactionId: 12,
+    txDatetime: new Date("2025-11-08T10:40:00"),
+    customerId: 109,
+    terminalId: 9,
+    txAmount: 129.66,
+    txTimeSeconds: 3000,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 13,
+    txDatetime: new Date("2025-11-08T15:10:00"),
+    customerId: 101,
+    terminalId: 3,
+    txAmount: 455.9,
+    txTimeSeconds: 4900,
+    txTimeDays: 4,
+    txFraud: false,
+    txFraudScenario: 3,
+  },
+  {
+    transactionId: 14,
+    txDatetime: new Date("2025-11-08T08:20:00"),
+    customerId: 110,
+    terminalId: 2,
+    txAmount: 59.99,
+    txTimeSeconds: 4100,
+    txTimeDays: 1,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 15,
+    txDatetime: new Date("2025-11-08T16:00:00"),
+    customerId: 103,
+    terminalId: 7,
+    txAmount: 140.0,
+    txTimeSeconds: 3550,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 2,
+  },
+  {
+    transactionId: 16,
+    txDatetime: new Date("2025-11-08T18:40:00"),
+    customerId: 107,
+    terminalId: 4,
+    txAmount: 273.8,
+    txTimeSeconds: 3600,
+    txTimeDays: 5,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 17,
+    txDatetime: new Date("2025-11-08T09:15:00"),
+    customerId: 108,
+    terminalId: 9,
+    txAmount: 220.75,
+    txTimeSeconds: 2750,
+    txTimeDays: 1,
+    txFraud: true,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 18,
+    txDatetime: new Date("2025-11-08T14:05:00"),
+    customerId: 106,
+    terminalId: 1,
+    txAmount: 333.4,
+    txTimeSeconds: 4050,
+    txTimeDays: 3,
+    txFraud: false,
+    txFraudScenario: 2,
+  },
+  {
+    transactionId: 19,
+    txDatetime: new Date("2025-11-08T11:50:00"),
+    customerId: 102,
+    terminalId: 8,
+    txAmount: 97.6,
+    txTimeSeconds: 3100,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 20,
+    txDatetime: new Date("2025-11-08T17:15:00"),
+    customerId: 105,
+    terminalId: 3,
+    txAmount: 401.5,
+    txTimeSeconds: 2200,
+    txTimeDays: 5,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 21,
+    txDatetime: new Date("2025-11-08T13:00:00"),
+    customerId: 104,
+    terminalId: 2,
+    txAmount: 172.1,
+    txTimeSeconds: 2550,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 3,
+  },
+  {
+    transactionId: 22,
+    txDatetime: new Date("2025-11-08T12:05:00"),
+    customerId: 107,
+    terminalId: 6,
+    txAmount: 284.45,
+    txTimeSeconds: 2990,
+    txTimeDays: 4,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 23,
+    txDatetime: new Date("2025-11-08T19:30:00"),
+    customerId: 110,
+    terminalId: 5,
+    txAmount: 475.0,
+    txTimeSeconds: 3400,
+    txTimeDays: 5,
+    txFraud: false,
+    txFraudScenario: 2,
+  },
+  {
+    transactionId: 24,
+    txDatetime: new Date("2025-11-08T09:40:00"),
+    customerId: 108,
+    terminalId: 9,
+    txAmount: 66.8,
+    txTimeSeconds: 2600,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 25,
+    txDatetime: new Date("2025-11-08T15:35:00"),
+    customerId: 101,
+    terminalId: 8,
+    txAmount: 315.6,
+    txTimeSeconds: 3760,
+    txTimeDays: 3,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 26,
+    txDatetime: new Date("2025-11-08T16:50:00"),
+    customerId: 106,
+    terminalId: 4,
+    txAmount: 154.7,
+    txTimeSeconds: 2320,
+    txTimeDays: 2,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 27,
+    txDatetime: new Date("2025-11-08T10:25:00"),
+    customerId: 105,
+    terminalId: 7,
+    txAmount: 198.55,
+    txTimeSeconds: 3250,
+    txTimeDays: 4,
+    txFraud: false,
+    txFraudScenario: 3,
+  },
+  {
+    transactionId: 28,
+    txDatetime: new Date("2025-11-08T18:10:00"),
+    customerId: 109,
+    terminalId: 6,
+    txAmount: 243.9,
+    txTimeSeconds: 2100,
+    txTimeDays: 5,
+    txFraud: false,
+    txFraudScenario: 1,
+  },
+  {
+    transactionId: 29,
+    txDatetime: new Date("2025-11-08T08:35:00"),
+    customerId: 102,
+    terminalId: 2,
+    txAmount: 177.65,
+    txTimeSeconds: 4700,
+    txTimeDays: 1,
+    txFraud: false,
+    txFraudScenario: 0,
+  },
+  {
+    transactionId: 30,
+    txDatetime: new Date("2025-11-08T14:45:00"),
+    customerId: 103,
+    terminalId: 5,
+    txAmount: 222.35,
+    txTimeSeconds: 4050,
+    txTimeDays: 3,
+    txFraud: false,
+    txFraudScenario: 2,
+  },
+];

@@ -7,3 +7,13 @@ body {
   height: 100vh;
   background-color: var(--bg-white);
 }
+
+body h1 {
+  margin: 24px 0px 0px 18px;
+  display: inline-block;
+}
+
+body p {
+  margin: 0px 0px 24px 18px;
+  display: block;
+}
