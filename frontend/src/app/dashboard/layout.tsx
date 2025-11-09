@@ -8,9 +8,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={dashboardStyles["dashboard-layout"]}>
+    <>
       <SideNavigation />
-      <div style={{ marginLeft: 200, height: "100vh" }}>{children}</div>
-    </div>
+      <div style={{ marginLeft: 200 }}>{children}</div>
+    </>
   );
 }
