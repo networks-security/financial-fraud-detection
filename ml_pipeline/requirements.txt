@@ -4,3 +4,8 @@ numpy
 seaborn
 matplotlib
 scikit-learn
+graphviz
+xgboost
+imblearn
+torch
+mlens
