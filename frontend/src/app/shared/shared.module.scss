@@ -37,10 +37,22 @@
 .sign-in {
   @extend %header-button;
   background-color: var(--focus-dark);
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .sign-up {
   @extend %header-button;
   background-color: var(--focus-light);
   color: var(--focus-dark);
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.header p {
+  &:hover {
+    text-decoration: underline;
+  }
 }
