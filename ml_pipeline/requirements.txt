@@ -8,4 +8,6 @@ graphviz
 xgboost
 imblearn
 torch
+lightgbm
+catboost
 mlens
