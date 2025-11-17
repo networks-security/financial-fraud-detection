@@ -1,14 +1,14 @@
 import time
-import sklearn
-
-import os
 import datetime
-import math
-import time
-import json
-import random
 import pandas as pd
 import numpy as np
+import sklearn
+import imblearn
+
+import os
+import math
+import json
+import random
 
 import sys
 sys.path.append('./utils')  # make sure Python knows where to look
@@ -131,49 +131,6 @@ def card_precision_top_k_custom(y_true, y_pred, top_k, transactions_df):
     return mean_card_precision_top_k
 
 
-def prequential_grid_search(transactions_df, 
-                            classifier, 
-                            input_features, output_feature, 
-                            parameters, scoring, 
-                            start_date_training, 
-                            n_folds=4,
-                            expe_type='Test',
-                            delta_train=7, 
-                            delta_delay=7, 
-                            delta_assessment=7,
-                            performance_metrics_list_grid=['roc_auc'],
-                            performance_metrics_list=['AUC ROC'],
-                            n_jobs=-1):
-    
-    estimators = [('scaler', sklearn.preprocessing.StandardScaler()), ('clf', classifier)]
-    pipe = sklearn.pipeline.Pipeline(estimators)
-    
-    prequential_split_indices=prequentialSplit(transactions_df,
-                                               start_date_training=start_date_training, 
-                                               n_folds=n_folds, 
-                                               delta_train=delta_train, 
-                                               delta_delay=delta_delay, 
-                                               delta_assessment=delta_assessment)
-    
-    grid_search = sklearn.model_selection.GridSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, refit=False, n_jobs=n_jobs)
-    
-    X=transactions_df[input_features]
-    y=transactions_df[output_feature]
-
-    grid_search.fit(X, y)
-    
-    performances_df=pd.DataFrame()
-    
-    for i in range(len(performance_metrics_list_grid)):
-        performances_df[performance_metrics_list[i]+' '+expe_type]=grid_search.cv_results_['mean_test_'+performance_metrics_list_grid[i]]
-        performances_df[performance_metrics_list[i]+' '+expe_type+' Std']=grid_search.cv_results_['std_test_'+performance_metrics_list_grid[i]]
-
-    performances_df['Parameters']=grid_search.cv_results_['params']
-    performances_df['Execution time']=grid_search.cv_results_['mean_fit_time']
-    
-    return performances_df
-
-
 ## ----------------------------- Implementation on Different CV search technique for hyperparam tuning ----------------------------- #
 
 def prequential_parameters_search(transactions_df, 
@@ -212,6 +169,62 @@ def prequential_parameters_search(transactions_df,
     
     if type_search=="random":
         
+        parameters_search = sklearn.model_selection.RandomizedSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
+                                     refit=False, n_jobs=n_jobs,n_iter=n_iter,random_state=random_state)
+
+    
+    X=transactions_df[input_features]
+    y=transactions_df[output_feature]
+
+    parameters_search.fit(X, y)
+    
+    performances_df=pd.DataFrame()
+    
+    for i in range(len(performance_metrics_list_grid)):
+        performances_df[performance_metrics_list[i]+' '+expe_type]=parameters_search.cv_results_['mean_test_'+performance_metrics_list_grid[i]]
+        performances_df[performance_metrics_list[i]+' '+expe_type+' Std']=parameters_search.cv_results_['std_test_'+performance_metrics_list_grid[i]]
+
+    performances_df['Parameters']=parameters_search.cv_results_['params']
+    performances_df['Execution time']=parameters_search.cv_results_['mean_fit_time']
+    
+    return performances_df
+
+def prequential_parameters_search_with_sample(transactions_df, 
+                            classifier, sampler_list,
+                            input_features, output_feature, 
+                            parameters, scoring, 
+                            start_date_training, 
+                            n_folds=4,
+                            expe_type='Test',
+                            delta_train=7, 
+                            delta_delay=7, 
+                            delta_assessment=7,
+                            performance_metrics_list_grid=['roc_auc'],
+                            performance_metrics_list=['AUC ROC'],
+                            type_search='grid',
+                            n_iter=10,
+                            random_state=0,
+                            n_jobs=-1):
+    
+    scaler = [('scaler', sklearn.preprocessing.StandardScaler())]
+    estimators = sampler_list + scaler + classifier
+    
+    pipe = imblearn.pipeline.Pipeline(estimators)
+    
+    prequential_split_indices=prequentialSplit(transactions_df,
+                                               start_date_training=start_date_training, 
+                                               n_folds=n_folds, 
+                                               delta_train=delta_train, 
+                                               delta_delay=delta_delay, 
+                                               delta_assessment=delta_assessment)
+    
+    parameters_search = None
+    
+    if type_search=="grid":
+        parameters_search = sklearn.model_selection.GridSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
+                                         refit=False, n_jobs=n_jobs)
+    
+    if type_search=="random":
         parameters_search = sklearn.model_selection.RandomizedSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
                                      refit=False, n_jobs=n_jobs,n_iter=n_iter,random_state=random_state)
 
@@ -291,6 +304,66 @@ def model_selection_wrapper(transactions_df,
     # And return as a single DataFrame
     return performances_df
 
+def model_selection_wrapper_with_sample(transactions_df, 
+                            classifier, 
+                            sampler_list,
+                            input_features, output_feature,
+                            parameters, 
+                            scoring, 
+                            start_date_training_for_valid,
+                            start_date_training_for_test,
+                            n_folds=4,
+                            delta_train=7, 
+                            delta_delay=7, 
+                            delta_assessment=7,
+                            performance_metrics_list_grid=['roc_auc'],
+                            performance_metrics_list=['AUC ROC'],
+                            type_search='grid',
+                            n_iter=10,
+                            random_state=0,
+                            n_jobs=-1):
+
+    # Get performances on the validation set using prequential validation
+    performances_df_validation=prequential_parameters_search(transactions_df, classifier, sampler_list,
+                            input_features, output_feature,
+                            parameters, scoring, 
+                            start_date_training=start_date_training_for_valid,
+                            n_folds=n_folds,
+                            expe_type='Validation',
+                            delta_train=delta_train, 
+                            delta_delay=delta_delay, 
+                            delta_assessment=delta_assessment,
+                            performance_metrics_list_grid=performance_metrics_list_grid,
+                            performance_metrics_list=performance_metrics_list,
+                            type_search=type_search,
+                            n_iter=n_iter,
+                            random_state=random_state,
+                            n_jobs=n_jobs)
+    
+    # Get performances on the test set using prequential validation
+    performances_df_test=prequential_parameters_search(transactions_df, classifier, sampler_list,
+                            input_features, output_feature,
+                            parameters, scoring, 
+                            start_date_training=start_date_training_for_test,
+                            n_folds=n_folds,
+                            expe_type='Test',
+                            delta_train=delta_train, 
+                            delta_delay=delta_delay, 
+                            delta_assessment=delta_assessment,
+                            performance_metrics_list_grid=performance_metrics_list_grid,
+                            performance_metrics_list=performance_metrics_list,
+                            type_search=type_search,
+                            n_iter=n_iter,
+                            random_state=random_state,
+                            n_jobs=n_jobs)
+    
+    # Bind the two resulting DataFrames
+    performances_df_validation.drop(columns=['Parameters','Execution time'], inplace=True)
+    performances_df=pd.concat([performances_df_test,performances_df_validation],axis=1)
+
+    # And return as a single DataFrame
+    return performances_df
+
 # # ------------------------------ Preparing Param for Hyperparam Tuning ------------------------------
 # # Only keep columns that are needed as argument to the custom scoring function
 # # (in order to reduce the serialization time of transaction dataset)
@@ -307,22 +380,43 @@ def model_selection_wrapper(transactions_df,
 #            'card_precision@100': card_precision_top_100,
 #            }
 
-
 # # ---------------------------- Different Classifier and its Param ----------------------------
 
 # classifier = sklearn.linear_model.LogisticRegression()
-# parameters = {'clf__C':[0.1,1,10,100], 'clf__random_state':[0]}
+# parameters = {'clf__C':[0.1,1,10,100], 
+#               'clf__random_state':[0]} # => need to invoke sample techniques
 
 # classifier = sklearn.tree.DecisionTreeClassifier()
-# parameters = {'clf__max_depth':[2,3,4,5,6,7,8,9,10,20,50], 'clf__random_state':[0]}
+# parameters = {'clf__max_depth':[2,3,4,5,6,7,8,9,10,20,50], 
+#               'clf__random_state':[0], 
+#               'clf__n_jobs':[-1]} # => need to invoke sample techniques
 
-# classifier = sklearn.ensemble.RandomForestClassifier()
-# parameters = {'clf__max_depth':[5,10,20,50], 'clf__n_estimators':[25,50,100],
-#               'clf__random_state':[0],'clf__n_jobs':[1]}
+# classifier = imblearn.ensemble.BalancedBaggingClassifier()
+# # Set of parameters for which to assess model performances
+# parameters = {'clf__base_estimator':[sklearn.tree.DecisionTreeClassifier(max_depth=20,random_state=0)], 
+#               'clf__n_estimators':[100],
+#               'clf__sampling_strategy':[0.02, 0.05, 0.1, 0.5, 1], 
+#               'clf__bootstrap':[True],
+#               'clf__sampler':[imblearn.under_sampling.RandomUnderSampler()],
+#               'clf__random_state':[0],
+#               'clf__n_jobs':[-1]}
+
+# classifier = imblearn.ensemble.BalancedRandomForestClassifier()
+# parameters = {'clf__max_depth':[5,10,20,50], 
+#               'clf__n_estimators':[25,50,100], 
+#               'clf__sampling_strategy':[0.01, 0.05, 0.1, 0.5, 1], 
+#               'clf__random_state':[0],
+#               'clf__n_jobs':[-1]
+#               'clf__random_state':[0], 
+#               'clf__n_jobs':[-1]}
 
 # classifier = xgboost.XGBClassifier()
-# parameters = {'clf__max_depth':[3,6,9], 'clf__n_estimators':[25,50,100],'clf__learning_rate':[0.1,0.3],
-#               'clf__random_state':[0],'clf__n_jobs':[1],'clf__n_verbosity':[0]}
+# parameters = {'clf__max_depth':[3,6,9], 
+#               'clf__n_estimators':[25,50,100], 
+#               'clf__learning_rate':[0.1,0.3], 
+#               'clf__scale_pos_weight':[1,5,10,50,100], 
+#               'clf__random_state':[0], 
+#               'clf__n_jobs':[-1]}
 
 
 
@@ -354,3 +448,47 @@ def model_selection_wrapper(transactions_df,
 
 # # Rename to performances_df_xgboost_random for model performance comparison
 # performances_df_xgboost_random=performances_df
+
+
+# # ---------------------------- Apply hyperparam tuning with combined sampling techniques ----------------------------
+
+
+
+# # Define sampling strategy
+# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE()),
+#                 ('sampler2', imblearn.under_sampling.RandomUnderSampler())
+#                ]
+
+# # Define classifier
+# classifier = sklearn.tree.DecisionTreeClassifier()
+# parameters = {'clf__max_depth':[5], 'clf__random_state':[0],
+#               'sampler1__sampling_strategy':[0.1], 
+#               'sampler2__sampling_strategy':[0.1, 0.5, 1], 
+#               'sampler1__random_state':[0], 'sampler2__random_state':[0]}
+
+
+
+# start_time = time.time()
+
+# # Fit models and assess performances for all parameters
+# performances_df = model_selection_wrapper_with_sampler(transactions_df, classifier, sampler_list, 
+#                                                      input_features, output_feature,
+#                                                      parameters, scoring, 
+#                                                      start_date_training_for_valid,
+#                                                      start_date_training_for_test,
+#                                                      n_folds=n_folds,
+#                                                      delta_train=delta_train, 
+#                                                      delta_delay=delta_delay, 
+#                                                      delta_assessment=delta_assessment,
+#                                                      performance_metrics_list_grid=performance_metrics_list_grid,
+#                                                      performance_metrics_list=performance_metrics_list,
+#                                                      n_jobs=1)
+
+# execution_time_dt_combined = time.time()-start_time
+
+# # Select parameter of interest (max_depth)
+# parameters_dict = dict(performances_df['Parameters'])
+# performances_df['Parameters summary']=[parameters_dict[i]['sampler2__sampling_strategy'] for i in range(len(parameters_dict))]
+
+# # Rename to performances_df_combined for model performance comparison at the end of this notebook
+# performances_df_combined = performances_df
