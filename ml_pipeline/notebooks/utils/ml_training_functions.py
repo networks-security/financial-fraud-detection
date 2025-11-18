@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import sklearn
 import imblearn
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 import os
 import math
@@ -88,11 +89,30 @@ def prequentialSplit(transactions_df,
     return prequential_split_indices
 
 
-def card_precision_top_k(predictions_df, top_k):
+def card_precision_top_k_day(df_day,top_k):
+    
+    # This takes the max of the predictions AND the max of label TX_FRAUD for each CUSTOMER_ID, 
+    # and sorts by decreasing order of fraudulent prediction
+    df_day = df_day.groupby('CUSTOMER_ID').max().sort_values(by="predictions", ascending=False).reset_index(drop=False)
+            
+    # Get the top k most suspicious cards
+    df_day_top_k=df_day.head(top_k)
+    list_detected_compromised_cards=list(df_day_top_k[df_day_top_k.TX_FRAUD==1].CUSTOMER_ID)
+    
+    # Compute precision top k
+    card_precision_top_k = len(list_detected_compromised_cards) / top_k
+    
+    return list_detected_compromised_cards, card_precision_top_k
+
+
+def card_precision_top_k(predictions_df, top_k, remove_detected_compromised_cards=True):
 
     # Sort days by increasing order
     list_days=list(predictions_df['TX_TIME_DAYS'].unique())
     list_days.sort()
+    
+    # At first, the list of detected compromised cards is empty
+    list_detected_compromised_cards = []
     
     card_precision_top_k_per_day_list = []
     nb_compromised_cards_per_day = []
@@ -103,11 +123,18 @@ def card_precision_top_k(predictions_df, top_k):
         df_day = predictions_df[predictions_df['TX_TIME_DAYS']==day]
         df_day = df_day[['predictions', 'CUSTOMER_ID', 'TX_FRAUD']]
         
+        # Let us remove detected compromised cards from the set of daily transactions
+        df_day = df_day[df_day.CUSTOMER_ID.isin(list_detected_compromised_cards)==False]
+        
         nb_compromised_cards_per_day.append(len(df_day[df_day.TX_FRAUD==1].CUSTOMER_ID.unique()))
         
-        _, card_precision_top_k = utils_ml_assessment.card_precision_top_k_day(df_day,top_k)
+        detected_compromised_cards, card_precision_top_k = card_precision_top_k_day(df_day,top_k)
         
         card_precision_top_k_per_day_list.append(card_precision_top_k)
+        
+        # Let us update the list of detected compromised cards
+        if remove_detected_compromised_cards:
+            list_detected_compromised_cards.extend(detected_compromised_cards)
         
     # Compute the mean
     mean_card_precision_top_k = np.array(card_precision_top_k_per_day_list).mean()
@@ -124,8 +151,7 @@ def card_precision_top_k_custom(y_true, y_pred, top_k, transactions_df):
     predictions_df['predictions']=y_pred
     
     # Compute the CP@k using the function implemented in Chapter 4, Section 4.2
-    nb_compromised_cards_per_day,card_precision_top_k_per_day_list,mean_card_precision_top_k=\
-        card_precision_top_k(predictions_df, top_k)
+    nb_compromised_cards_per_day,card_precision_top_k_per_day_list,mean_card_precision_top_k=card_precision_top_k(predictions_df, top_k)
     
     # Return the mean_card_precision_top_k
     return mean_card_precision_top_k
@@ -136,7 +162,7 @@ def card_precision_top_k_custom(y_true, y_pred, top_k, transactions_df):
 def prequential_parameters_search(transactions_df, 
                             classifier, 
                             input_features, output_feature, 
-                            parameters, scoring, 
+                            parameters, scoring, cv,
                             start_date_training, 
                             n_folds=4,
                             expe_type='Test',
@@ -150,33 +176,36 @@ def prequential_parameters_search(transactions_df,
                             random_state=0,
                             n_jobs=-1):
     
-    estimators = [('scaler', sklearn.preprocessing.StandardScaler()), ('clf', classifier)]
+    scaler = [('scaler', sklearn.preprocessing.StandardScaler())]
+    clf = [('clf', classifier)]
+    estimators = scaler + clf
     pipe = sklearn.pipeline.Pipeline(estimators)
     
-    prequential_split_indices=prequentialSplit(transactions_df,
-                                               start_date_training=start_date_training, 
-                                               n_folds=n_folds, 
-                                               delta_train=delta_train, 
-                                               delta_delay=delta_delay, 
-                                               delta_assessment=delta_assessment)
+    # prequential_split_indices=prequentialSplit(transactions_df,
+    #                                            start_date_training=start_date_training, 
+    #                                            n_folds=n_folds, 
+    #                                            delta_train=delta_train, 
+    #                                            delta_delay=delta_delay, 
+    #                                            delta_assessment=delta_assessment)
     
     parameters_search = None
     
     if type_search=="grid":
         
-        parameters_search = sklearn.model_selection.GridSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
-                                         refit=False, n_jobs=n_jobs)
+        parameters_search = GridSearchCV(pipe, parameters, scoring=scoring, cv=cv, 
+                                         refit=False, n_jobs=n_jobs, error_score='raise')
     
     if type_search=="random":
         
-        parameters_search = sklearn.model_selection.RandomizedSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
-                                     refit=False, n_jobs=n_jobs,n_iter=n_iter,random_state=random_state)
+        parameters_search = RandomizedSearchCV(pipe, parameters, scoring=scoring, cv=cv, 
+                                     refit=False, n_jobs=n_jobs,n_iter=n_iter,random_state=random_state, error_score='raise')
 
     
     X=transactions_df[input_features]
     y=transactions_df[output_feature]
 
     parameters_search.fit(X, y)
+    # best_params = parameters_search.best_params_
     
     performances_df=pd.DataFrame()
     
@@ -192,7 +221,7 @@ def prequential_parameters_search(transactions_df,
 def prequential_parameters_search_with_sample(transactions_df, 
                             classifier, sampler_list,
                             input_features, output_feature, 
-                            parameters, scoring, 
+                            parameters, scoring, cv,
                             start_date_training, 
                             n_folds=4,
                             expe_type='Test',
@@ -206,26 +235,27 @@ def prequential_parameters_search_with_sample(transactions_df,
                             random_state=0,
                             n_jobs=-1):
     
+    
+    # prequential_split_indices=prequentialSplit(transactions_df,
+    #                                            start_date_training=start_date_training, 
+    #                                            n_folds=n_folds, 
+    #                                            delta_train=delta_train, 
+    #                                            delta_delay=delta_delay, 
+    #                                            delta_assessment=delta_assessment)
+    
     scaler = [('scaler', sklearn.preprocessing.StandardScaler())]
-    estimators = sampler_list + scaler + classifier
-    
+    clf = [('clf', classifier)]
+    estimators = sampler_list + scaler + clf
     pipe = imblearn.pipeline.Pipeline(estimators)
-    
-    prequential_split_indices=prequentialSplit(transactions_df,
-                                               start_date_training=start_date_training, 
-                                               n_folds=n_folds, 
-                                               delta_train=delta_train, 
-                                               delta_delay=delta_delay, 
-                                               delta_assessment=delta_assessment)
-    
+
     parameters_search = None
     
     if type_search=="grid":
-        parameters_search = sklearn.model_selection.GridSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
+        parameters_search = GridSearchCV(pipe, parameters, scoring=scoring, cv=cv, 
                                          refit=False, n_jobs=n_jobs)
     
     if type_search=="random":
-        parameters_search = sklearn.model_selection.RandomizedSearchCV(pipe, parameters, scoring=scoring, cv=prequential_split_indices, 
+        parameters_search = RandomizedSearchCV(pipe, parameters, scoring=scoring, cv=cv, 
                                      refit=False, n_jobs=n_jobs,n_iter=n_iter,random_state=random_state)
 
     
@@ -233,6 +263,7 @@ def prequential_parameters_search_with_sample(transactions_df,
     y=transactions_df[output_feature]
 
     parameters_search.fit(X, y)
+    # best_params = parameters_search.best_params_
     
     performances_df=pd.DataFrame()
     
@@ -249,7 +280,7 @@ def model_selection_wrapper(transactions_df,
                             classifier, 
                             input_features, output_feature,
                             parameters, 
-                            scoring, 
+                            scoring, cv,
                             start_date_training_for_valid,
                             start_date_training_for_test,
                             n_folds=4,
@@ -264,9 +295,10 @@ def model_selection_wrapper(transactions_df,
                             n_jobs=-1):
 
     # Get performances on the validation set using prequential validation
-    performances_df_validation=prequential_parameters_search(transactions_df, classifier, 
+    performances_df_validation=prequential_parameters_search(
+                            transactions_df, classifier, 
                             input_features, output_feature,
-                            parameters, scoring, 
+                            parameters, scoring, cv,
                             start_date_training=start_date_training_for_valid,
                             n_folds=n_folds,
                             expe_type='Validation',
@@ -281,9 +313,10 @@ def model_selection_wrapper(transactions_df,
                             n_jobs=n_jobs)
     
     # Get performances on the test set using prequential validation
-    performances_df_test=prequential_parameters_search(transactions_df, classifier, 
+    performances_df_test=prequential_parameters_search(
+                            transactions_df, classifier, 
                             input_features, output_feature,
-                            parameters, scoring, 
+                            parameters, scoring, cv, 
                             start_date_training=start_date_training_for_test,
                             n_folds=n_folds,
                             expe_type='Test',
@@ -305,11 +338,10 @@ def model_selection_wrapper(transactions_df,
     return performances_df
 
 def model_selection_wrapper_with_sample(transactions_df, 
-                            classifier, 
-                            sampler_list,
+                            classifier, sampler_list,
                             input_features, output_feature,
                             parameters, 
-                            scoring, 
+                            scoring, cv, 
                             start_date_training_for_valid,
                             start_date_training_for_test,
                             n_folds=4,
@@ -324,9 +356,11 @@ def model_selection_wrapper_with_sample(transactions_df,
                             n_jobs=-1):
 
     # Get performances on the validation set using prequential validation
-    performances_df_validation=prequential_parameters_search(transactions_df, classifier, sampler_list,
+    performances_df_validation=prequential_parameters_search_with_sample(
+                            transactions_df, 
+                            classifier, sampler_list,
                             input_features, output_feature,
-                            parameters, scoring, 
+                            parameters, scoring, cv, 
                             start_date_training=start_date_training_for_valid,
                             n_folds=n_folds,
                             expe_type='Validation',
@@ -341,9 +375,11 @@ def model_selection_wrapper_with_sample(transactions_df,
                             n_jobs=n_jobs)
     
     # Get performances on the test set using prequential validation
-    performances_df_test=prequential_parameters_search(transactions_df, classifier, sampler_list,
+    performances_df_test=prequential_parameters_search_with_sample(
+                            transactions_df, 
+                            classifier, sampler_list,
                             input_features, output_feature,
-                            parameters, scoring, 
+                            parameters, scoring, cv,
                             start_date_training=start_date_training_for_test,
                             n_folds=n_folds,
                             expe_type='Test',
@@ -364,61 +400,106 @@ def model_selection_wrapper_with_sample(transactions_df,
     # And return as a single DataFrame
     return performances_df
 
-# # ------------------------------ Preparing Param for Hyperparam Tuning ------------------------------
-# # Only keep columns that are needed as argument to the custom scoring function
-# # (in order to reduce the serialization time of transaction dataset)
-# transactions_df_scorer=transactions_df[['CUSTOMER_ID', 'TX_FRAUD','TX_TIME_DAYS']]
-
-# # Make scorer using card_precision_top_k_custom
-# card_precision_top_100 = sklearn.metrics.make_scorer(card_precision_top_k_custom, 
-#                                                      needs_proba=True, 
-#                                                      top_k=100, 
-#                                                      transactions_df=transactions_df_scorer)
-
-# scoring = {'roc_auc':'roc_auc',
-#            'average_precision': 'average_precision',
-#            'card_precision@100': card_precision_top_100,
-#            }
-
 # # ---------------------------- Different Classifier and its Param ----------------------------
 
-# classifier = sklearn.linear_model.LogisticRegression()
-# parameters = {'clf__C':[0.1,1,10,100], 
-#               'clf__random_state':[0]} # => need to invoke sample techniques
+# import sklearn
+# import lightgbm as lgb
+# from catboost import CatBoostClassifier
+# from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier
 
-# classifier = sklearn.tree.DecisionTreeClassifier()
-# parameters = {'clf__max_depth':[2,3,4,5,6,7,8,9,10,20,50], 
-#               'clf__random_state':[0], 
-#               'clf__n_jobs':[-1]} # => need to invoke sample techniques
 
-# classifier = imblearn.ensemble.BalancedBaggingClassifier()
+# # this handle imbalance dataset with 'class_weight' param
+# logreg_clf = sklearn.linear_model.LogisticRegression() # -> based on param
+# logreg_params = {'clf__C':[0.1,1,10,100], 
+#               'clf__class_weight':['balanced'],
+#               'clf__random_state':[0]}
+# # this handle imbalance dataset with hybrid resampling technique
+# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE()),
+#                 ('sampler2', imblearn.under_sampling.RandomUnderSampler())]
+# logreg_params_hybridsampling = {'clf__C':[0.1,1,10,100], 'clf__random_state':[0],
+#               'sampler1__sampling_strategy':[0.1], 
+#               'sampler2__sampling_strategy':[0.1, 0.5, 1], 
+#               'sampler1__random_state':[0], 'sampler2__random_state':[0]}
+# # this handle imbalance dataset with only under-resampling technique
+# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE())]
+# logreg_params_undersampling = {'clf__C':[0.1,1,10,100], 'clf__random_state':[0],
+#               'sampler1__sampling_strategy':[0.1],
+#               'sampler1__random_state':[0]}
+
+# dt_clf = imblearn.ensemble.BalancedBaggingClassifier()
 # # Set of parameters for which to assess model performances
-# parameters = {'clf__base_estimator':[sklearn.tree.DecisionTreeClassifier(max_depth=20,random_state=0)], 
-#               'clf__n_estimators':[100],
+# dt_params = {'clf__base_estimator':[sklearn.tree.DecisionTreeClassifier(max_depth=20,random_state=0)], 
+#               'clf__n_estimators':[2,3,4,5,6,7,8,9,10,20,50,100],
 #               'clf__sampling_strategy':[0.02, 0.05, 0.1, 0.5, 1], 
 #               'clf__bootstrap':[True],
 #               'clf__sampler':[imblearn.under_sampling.RandomUnderSampler()],
 #               'clf__random_state':[0],
 #               'clf__n_jobs':[-1]}
 
-# classifier = imblearn.ensemble.BalancedRandomForestClassifier()
-# parameters = {'clf__max_depth':[5,10,20,50], 
+# brf_clf = imblearn.ensemble.BalancedRandomForestClassifier()
+# brf_params = {'clf__max_depth':[5,10,20,50], 
 #               'clf__n_estimators':[25,50,100], 
 #               'clf__sampling_strategy':[0.01, 0.05, 0.1, 0.5, 1], 
 #               'clf__random_state':[0],
-#               'clf__n_jobs':[-1]
+#               'clf__n_jobs':[-1],
 #               'clf__random_state':[0], 
 #               'clf__n_jobs':[-1]}
 
-# classifier = xgboost.XGBClassifier()
-# parameters = {'clf__max_depth':[3,6,9], 
+# gb_clf = GradientBoostingClassifier()
+# # this handle imbalance dataset with hybrid resampling technique
+# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE()),
+#                 ('sampler2', imblearn.under_sampling.RandomUnderSampler())]
+# gb_params_hybridsampling = {'clf__n_estimators': [50, 100, 200],
+#             'clf__max_depth': [2, 3, 5],
+#             'clf__learning_rate': [0.01, 0.05, 0.1],
+#             'clf__n_jobs':[-1], 
+#             'clf__random_state':[0],
+#             'sampler1__sampling_strategy':[0.1], 
+#             'sampler2__sampling_strategy':[0.1, 0.5, 1], 
+#             'sampler1__random_state':[0], 'sampler2__random_state':[0]}
+# # this handle imbalance dataset with only under-resampling technique
+# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE())]
+# gb_params_undersampling = {'clf__n_estimators': [50, 100, 200],
+#             'clf__max_depth': [2, 3, 5],
+#             'clf__learning_rate': [0.01, 0.05, 0.1],
+#             'clf__n_jobs':[-1], 
+#             'clf__random_state':[0],
+#             'sampler1__sampling_strategy':[0.1],
+#             'sampler1__random_state':[0]}
+
+# lgbm_clf = lgb.LGBMClassifier()
+# lgbm_params = {'clf__max_depth':[3,6,9], 
+#               'clf__n_estimators':[25,50,100], 
+#               'clf__learning_rate':[0.1,0.3], 
+#               'clf__num_leaves': [15, 31, 63, 127],
+#               'clf__subsample': [0.7, 0.8, 1.0],
+#               'clf__scale_pos_weight':[1,5,10,50,100], # Option 1 to handle imbalance dataset
+#               'clf__is_unbalance': [True, False], # Option 2 to handle imbalance dataset
+#               'clf__random_state':[0], 
+#               'clf__n_jobs':[-1]}
+
+# xgb_clf = xgboost.XGBClassifier()
+# xgb_params = {'clf__max_depth':[3,6,9], 
 #               'clf__n_estimators':[25,50,100], 
 #               'clf__learning_rate':[0.1,0.3], 
 #               'clf__scale_pos_weight':[1,5,10,50,100], 
 #               'clf__random_state':[0], 
 #               'clf__n_jobs':[-1]}
 
-
+# cat_clf = CatBoostClassifier()
+# cat_params = {
+#     'iterations': [100, 200, 500],
+#     'learning_rate': [0.01, 0.05, 0.1],
+#     'depth': [4, 6, 8],
+#     'l2_leaf_reg': [1, 3, 5, 7],
+#     'bagging_temperature': [0, 1, 5],
+#     'class_weights': [
+#         None,
+#         [1, 10],
+#         [1, 20],
+#         [1, 50]
+#     ]
+# }
 
 # start_time=time.time()
 
