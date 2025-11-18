@@ -133,3 +133,20 @@ def get_train_test_set(transactions_df, start_date_training, delta_train=7, delt
     test_df=test_df.sort_values('TRANSACTION_ID')
     
     return (train_df, test_df)
+
+def transform_new_df(transactions_df):
+    # Determind if the transaction is occured during weekend
+    transactions_df['TX_DURING_WEEKEND']=transactions_df.TX_DATETIME.apply(is_weekend)
+    
+    # Determind if the transaction is ocurred during night
+    transactions_df['TX_DURING_NIGHT']=transactions_df.TX_DATETIME.apply(is_night)
+
+    # Analyse each customer's spending behavior base on the different day range's avg spending amount
+    transactions_df=transactions_df.groupby('CUSTOMER_ID').apply(lambda x: get_customer_spending_behaviour_features(x, windows_size_in_days=[1,7,30]))
+    transactions_df=transactions_df.sort_values('TX_DATETIME').reset_index(drop=True)
+
+    # get_count_risk_rolling_window(transactions_df[transactions_df.TERMINAL_ID==3059], delay_period=7, windows_size_in_days=[1,7,30])
+
+    transactions_df=transactions_df.groupby('TERMINAL_ID').apply(lambda x: get_count_risk_rolling_window(x, delay_period=7, windows_size_in_days=[1,7,30], feature="TERMINAL_ID"))
+    transactions_df=transactions_df.sort_values('TX_DATETIME').reset_index(drop=True)
+
