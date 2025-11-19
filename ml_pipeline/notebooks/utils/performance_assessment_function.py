@@ -140,3 +140,58 @@ def get_summary_performances(performances_df, parameter_column_name="Parameters 
     performances_results.loc["Optimal hyperparameters"]=optimal_hyperparam_values
     
     return performances_results
+
+
+def rank_models(model_performances_list, metrics=None, weights=None):
+    
+    if isinstance(metrics, str):
+        metrics = [metrics]
+    
+    # Validate weights sum to 1.0
+    total_weight = sum(weights.get(m, 0) for m in metrics)
+    if not np.isclose(total_weight, 1.0):
+        raise ValueError(f"Weights must sum to 1.0, but got {total_weight}")
+    
+    # Extract validation metrics from each model's performance summary
+    ranking_data = []
+    
+    for model_name, perf_df in model_performances_list:
+        model_score = {}
+        model_score['Model'] = model_name
+        
+        # Extract validation performance metrics from the summary
+        validation_row = perf_df.loc['Validation performance']
+        
+        for metric in metrics:
+            if metric in validation_row.index:
+                # Parse metric value (format: "0.87+/-0.01")
+                metric_value = validation_row[metric]
+                if isinstance(metric_value, str):
+                    metric_value = float(metric_value.split('+/-')[0])
+                model_score[metric] = metric_value
+            else:
+                raise ValueError(f"Metric '{metric}' not found in performance summary")
+        
+        # Calculate weighted score if multiple metrics
+        if len(metrics) > 1:
+            weighted_score = sum(
+                model_score[metric] * weights.get(metric, 0) 
+                for metric in metrics
+            )
+            model_score['Weighted Score'] = weighted_score
+        else:
+            model_score['Score'] = model_score[metrics[0]]
+        
+        ranking_data.append(model_score)
+    
+    # Create ranking dataframe
+    ranking_df = pd.DataFrame(ranking_data)
+    
+    # Sort by score (descending - higher is better)
+    score_column = 'Weighted Score' if len(metrics) > 1 else 'Score'
+    ranking_df = ranking_df.sort_values(by=score_column, ascending=False).reset_index(drop=True)
+    
+    # Add rank column
+    ranking_df.insert(0, 'Rank', range(1, len(ranking_df) + 1))
+    
+    return ranking_df
