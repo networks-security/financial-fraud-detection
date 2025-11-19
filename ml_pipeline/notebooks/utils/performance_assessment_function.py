@@ -143,7 +143,7 @@ def get_summary_performances(performances_df, parameter_column_name="Parameters 
 
 
 def rank_models(model_performances_list, metrics=None, weights=None):
-    
+
     if isinstance(metrics, str):
         metrics = [metrics]
     
@@ -191,7 +191,7 @@ def rank_models(model_performances_list, metrics=None, weights=None):
     score_column = 'Weighted Score' if len(metrics) > 1 else 'Score'
     ranking_df = ranking_df.sort_values(by=score_column, ascending=False).reset_index(drop=True)
     
-    # Add rank column
-    ranking_df.insert(0, 'Rank', range(1, len(ranking_df) + 1))
+    # # Add rank column
+    # ranking_df.insert(0, 'Rank', range(1, len(ranking_df) + 1))
     
     return ranking_df

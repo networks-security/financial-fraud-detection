@@ -17,6 +17,17 @@ sys.path.append('./utils')  # make sure Python knows where to look
 import transform_data_functions as utils_transform_data
 import performance_assessment_function as utils_ml_assessment
 
+# NumPy compatibility patch for deprecated np.int (removed in NumPy 1.20+)
+# This fixes issues with older libraries like mlens that use deprecated aliases
+if not hasattr(np, 'int'):
+    np.int = np.int64
+    np.float = np.float64
+    np.complex = np.complex128
+    np.object = np.object_
+    np.str = np.str_
+    np.long = np.int64
+    np.unicode = np.str_
+
 
 def scaleData(train,test,features):
     scaler = sklearn.preprocessing.StandardScaler()
@@ -399,177 +410,3 @@ def model_selection_wrapper_with_sample(transactions_df,
 
     # And return as a single DataFrame
     return performances_df
-
-# # ---------------------------- Different Classifier and its Param ----------------------------
-
-# import sklearn
-# import lightgbm as lgb
-# from catboost import CatBoostClassifier
-# from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier
-
-
-# # this handle imbalance dataset with 'class_weight' param
-# logreg_clf = sklearn.linear_model.LogisticRegression() # -> based on param
-# logreg_params = {'clf__C':[0.1,1,10,100], 
-#               'clf__class_weight':['balanced'],
-#               'clf__random_state':[0]}
-# # this handle imbalance dataset with hybrid resampling technique
-# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE()),
-#                 ('sampler2', imblearn.under_sampling.RandomUnderSampler())]
-# logreg_params_hybridsampling = {'clf__C':[0.1,1,10,100], 'clf__random_state':[0],
-#               'sampler1__sampling_strategy':[0.1], 
-#               'sampler2__sampling_strategy':[0.1, 0.5, 1], 
-#               'sampler1__random_state':[0], 'sampler2__random_state':[0]}
-# # this handle imbalance dataset with only under-resampling technique
-# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE())]
-# logreg_params_undersampling = {'clf__C':[0.1,1,10,100], 'clf__random_state':[0],
-#               'sampler1__sampling_strategy':[0.1],
-#               'sampler1__random_state':[0]}
-
-# dt_clf = imblearn.ensemble.BalancedBaggingClassifier()
-# # Set of parameters for which to assess model performances
-# dt_params = {'clf__base_estimator':[sklearn.tree.DecisionTreeClassifier(max_depth=20,random_state=0)], 
-#               'clf__n_estimators':[2,3,4,5,6,7,8,9,10,20,50,100],
-#               'clf__sampling_strategy':[0.02, 0.05, 0.1, 0.5, 1], 
-#               'clf__bootstrap':[True],
-#               'clf__sampler':[imblearn.under_sampling.RandomUnderSampler()],
-#               'clf__random_state':[0],
-#               'clf__n_jobs':[-1]}
-
-# brf_clf = imblearn.ensemble.BalancedRandomForestClassifier()
-# brf_params = {'clf__max_depth':[5,10,20,50], 
-#               'clf__n_estimators':[25,50,100], 
-#               'clf__sampling_strategy':[0.01, 0.05, 0.1, 0.5, 1], 
-#               'clf__random_state':[0],
-#               'clf__n_jobs':[-1],
-#               'clf__random_state':[0], 
-#               'clf__n_jobs':[-1]}
-
-# gb_clf = GradientBoostingClassifier()
-# # this handle imbalance dataset with hybrid resampling technique
-# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE()),
-#                 ('sampler2', imblearn.under_sampling.RandomUnderSampler())]
-# gb_params_hybridsampling = {'clf__n_estimators': [50, 100, 200],
-#             'clf__max_depth': [2, 3, 5],
-#             'clf__learning_rate': [0.01, 0.05, 0.1],
-#             'clf__n_jobs':[-1], 
-#             'clf__random_state':[0],
-#             'sampler1__sampling_strategy':[0.1], 
-#             'sampler2__sampling_strategy':[0.1, 0.5, 1], 
-#             'sampler1__random_state':[0], 'sampler2__random_state':[0]}
-# # this handle imbalance dataset with only under-resampling technique
-# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE())]
-# gb_params_undersampling = {'clf__n_estimators': [50, 100, 200],
-#             'clf__max_depth': [2, 3, 5],
-#             'clf__learning_rate': [0.01, 0.05, 0.1],
-#             'clf__n_jobs':[-1], 
-#             'clf__random_state':[0],
-#             'sampler1__sampling_strategy':[0.1],
-#             'sampler1__random_state':[0]}
-
-# lgbm_clf = lgb.LGBMClassifier()
-# lgbm_params = {'clf__max_depth':[3,6,9], 
-#               'clf__n_estimators':[25,50,100], 
-#               'clf__learning_rate':[0.1,0.3], 
-#               'clf__num_leaves': [15, 31, 63, 127],
-#               'clf__subsample': [0.7, 0.8, 1.0],
-#               'clf__scale_pos_weight':[1,5,10,50,100], # Option 1 to handle imbalance dataset
-#               'clf__is_unbalance': [True, False], # Option 2 to handle imbalance dataset
-#               'clf__random_state':[0], 
-#               'clf__n_jobs':[-1]}
-
-# xgb_clf = xgboost.XGBClassifier()
-# xgb_params = {'clf__max_depth':[3,6,9], 
-#               'clf__n_estimators':[25,50,100], 
-#               'clf__learning_rate':[0.1,0.3], 
-#               'clf__scale_pos_weight':[1,5,10,50,100], 
-#               'clf__random_state':[0], 
-#               'clf__n_jobs':[-1]}
-
-# cat_clf = CatBoostClassifier()
-# cat_params = {
-#     'iterations': [100, 200, 500],
-#     'learning_rate': [0.01, 0.05, 0.1],
-#     'depth': [4, 6, 8],
-#     'l2_leaf_reg': [1, 3, 5, 7],
-#     'bagging_temperature': [0, 1, 5],
-#     'class_weights': [
-#         None,
-#         [1, 10],
-#         [1, 20],
-#         [1, 50]
-#     ]
-# }
-
-# start_time=time.time()
-
-# performances_df=model_selection_wrapper(transactions_df, classifier, 
-#                                         input_features, output_feature,
-#                                         parameters, scoring, 
-#                                         start_date_training_for_valid,
-#                                         start_date_training_for_test,
-#                                         n_folds=n_folds,
-#                                         delta_train=delta_train, 
-#                                         delta_delay=delta_delay, 
-#                                         delta_assessment=delta_assessment,
-#                                         performance_metrics_list_grid=performance_metrics_list_grid,
-#                                         performance_metrics_list=performance_metrics_list,
-#                                         type_search='random',
-#                                         n_iter=10,
-#                                         random_state=0,
-#                                         n_jobs=1)
-
-# execution_time_boosting_random = time.time()-start_time
-
-# parameters_dict=dict(performances_df['Parameters'])
-# performances_df['Parameters summary']=[str(parameters_dict[i]['clf__n_estimators'])+
-#                                    '/'+ str(parameters_dict[i]['clf__learning_rate'])+
-#                                    '/'+ str(parameters_dict[i]['clf__max_depth'])
-#                                    for i in range(len(parameters_dict))]
-
-# # Rename to performances_df_xgboost_random for model performance comparison
-# performances_df_xgboost_random=performances_df
-
-
-# # ---------------------------- Apply hyperparam tuning with combined sampling techniques ----------------------------
-
-
-
-# # Define sampling strategy
-# sampler_list = [('sampler1', imblearn.over_sampling.SMOTE()),
-#                 ('sampler2', imblearn.under_sampling.RandomUnderSampler())
-#                ]
-
-# # Define classifier
-# classifier = sklearn.tree.DecisionTreeClassifier()
-# parameters = {'clf__max_depth':[5], 'clf__random_state':[0],
-#               'sampler1__sampling_strategy':[0.1], 
-#               'sampler2__sampling_strategy':[0.1, 0.5, 1], 
-#               'sampler1__random_state':[0], 'sampler2__random_state':[0]}
-
-
-
-# start_time = time.time()
-
-# # Fit models and assess performances for all parameters
-# performances_df = model_selection_wrapper_with_sampler(transactions_df, classifier, sampler_list, 
-#                                                      input_features, output_feature,
-#                                                      parameters, scoring, 
-#                                                      start_date_training_for_valid,
-#                                                      start_date_training_for_test,
-#                                                      n_folds=n_folds,
-#                                                      delta_train=delta_train, 
-#                                                      delta_delay=delta_delay, 
-#                                                      delta_assessment=delta_assessment,
-#                                                      performance_metrics_list_grid=performance_metrics_list_grid,
-#                                                      performance_metrics_list=performance_metrics_list,
-#                                                      n_jobs=1)
-
-# execution_time_dt_combined = time.time()-start_time
-
-# # Select parameter of interest (max_depth)
-# parameters_dict = dict(performances_df['Parameters'])
-# performances_df['Parameters summary']=[parameters_dict[i]['sampler2__sampling_strategy'] for i in range(len(parameters_dict))]
-
-# # Rename to performances_df_combined for model performance comparison at the end of this notebook
-# performances_df_combined = performances_df

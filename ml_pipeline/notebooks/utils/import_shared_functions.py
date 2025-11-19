@@ -38,6 +38,17 @@ import json
 import datetime
 import random
 
+# NumPy compatibility patch for deprecated np.int (removed in NumPy 1.20+)
+# This fixes issues with older libraries like mlens that use deprecated aliases
+if not hasattr(np, 'int'):
+    np.int = np.int64
+    np.float = np.float64
+    np.complex = np.complex128
+    np.object = np.object_
+    np.str = np.str_
+    np.long = np.int64
+    np.unicode = np.str_
+
 #import sklearn
 import sklearn
 from sklearn import *
