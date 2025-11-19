@@ -37,37 +37,27 @@ def read_from_files(DIR_INPUT, BEGIN_DATE, END_DATE):
     
     return df_final
 
-def save_model_to_file(performances_df_dictionary, execution_times):
-    filehandler = open('performances_model_selection.pkl', 'wb') 
-    pickle.dump((performances_df_dictionary, execution_times), filehandler)
+def save_model_data(file_path, model_data):
+    filehandler = open(file_path, 'wb') 
+    pickle.dump(model_data, filehandler)
     filehandler.close()
 
-def load_model_to_file():
-    file_path = 'performances_model_selection.pkl'
+def load_model_data(file_path):
+    
     try:
         with open(file_path, 'rb') as file:
-            performances_df_dictionary, execution_times = pickle.load(file)
+            loaded_data = pickle.load(file)
+        
+        # Handle both single object and tuple of 2 objects
+        if isinstance(loaded_data, tuple) and len(loaded_data) == 2:
+            df_dictionary, execution_times = loaded_data
+        else:
+            # Single object case (e.g., just the model dictionary)
+            df_dictionary = loaded_data
+            execution_times = None
+        
         print("Object successfully loaded from pickle file:")
-        return performances_df_dictionary, execution_times
-    except FileNotFoundError:
-        print(f"Error: The file '{file_path}' was not found.")
-        return None, None
-    except Exception as e:
-        print(f"An error occurred while loading the pickle file: {e}")
-        return None, None
-
-def save_model_performance_result_to_file(performances_df_dictionary, execution_times):
-    filehandler = open('performances_ensembles.pkl', 'wb') 
-    pickle.dump((performances_df_dictionary, execution_times), filehandler)
-    filehandler.close()
-
-def load_model_performance_summary():
-    file_path = 'performances_ensembles.pkl'
-    try:
-        with open(file_path, 'rb') as file:
-            performances_df_dictionary, execution_times = pickle.load(file)
-        print("Object successfully loaded from pickle file:")
-        return performances_df_dictionary, execution_times
+        return df_dictionary, execution_times
     except FileNotFoundError:
         print(f"Error: The file '{file_path}' was not found.")
         return None, None
