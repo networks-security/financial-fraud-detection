@@ -42,7 +42,12 @@ import random
 import sklearn
 from sklearn import *
 
-get_ipython().run_line_magic('matplotlib', 'inline')
+# Only enable matplotlib inline in Jupyter notebooks (when get_ipython is available)
+try:
+    get_ipython().run_line_magic('matplotlib', 'inline')
+except NameError:
+    # get_ipython() is not defined in multiprocessing worker processes or non-Jupyter environments
+    pass
 
 import matplotlib
 import matplotlib.pyplot as plt

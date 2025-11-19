@@ -11,3 +11,4 @@ torch
 lightgbm
 catboost
 mlens
+imbalanced-learn

@@ -2,6 +2,11 @@ from sklearn import metrics
 import pandas as pd
 import numpy as np
 
+import sys
+sys.path.append('./utils')  # make sure Python knows where to look
+
+import import_shared_functions as utils_import
+
 def card_precision_top_k_day(df_day,top_k):
     
     # This takes the max of the predictions AND the max of label TX_FRAUD for each CUSTOMER_ID, 
@@ -111,3 +116,27 @@ def execution_times_model_collection(fitted_models_and_predictions_dictionary):
         execution_times=execution_times.append(execution_times_model)
         
     return execution_times
+
+def get_summary_performances(performances_df, parameter_column_name="Parameters summary"):
+    
+    performances_results = utils_import.get_summary_performances(performances_df, parameter_column_name)
+
+    metrics = ['AUC ROC','Average precision','Card Precision@100']
+    metrics_test = ['AUC ROC Test','Average precision Test','Card Precision@100 Test']
+
+    # Add hyperparameter values from 'Parameters' column for each best result
+    best_hyperparam_values = []
+    for metric in metrics:
+        index_best_validation_performance = performances_df.index[np.argmax(performances_df[metric+' Validation'].values)]
+        best_hyperparam_values.append(performances_df['Parameters'].iloc[index_best_validation_performance])
+    
+    performances_results.loc["Best hyperparameters"]=best_hyperparam_values
+    
+    optimal_hyperparam_values = []
+    for metric in metrics_test:
+        index_optimal_test_performance = performances_df.index[np.argmax(performances_df[metric].values)]
+        optimal_hyperparam_values.append(performances_df['Parameters'].iloc[index_optimal_test_performance])
+    
+    performances_results.loc["Optimal hyperparameters"]=optimal_hyperparam_values
+    
+    return performances_results

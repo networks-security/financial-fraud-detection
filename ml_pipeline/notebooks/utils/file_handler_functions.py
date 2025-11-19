@@ -41,3 +41,36 @@ def save_model_to_file(performances_df_dictionary, execution_times):
     filehandler = open('performances_model_selection.pkl', 'wb') 
     pickle.dump((performances_df_dictionary, execution_times), filehandler)
     filehandler.close()
+
+def load_model_to_file():
+    file_path = 'performances_model_selection.pkl'
+    try:
+        with open(file_path, 'rb') as file:
+            performances_df_dictionary, execution_times = pickle.load(file)
+        print("Object successfully loaded from pickle file:")
+        return performances_df_dictionary, execution_times
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+        return None, None
+    except Exception as e:
+        print(f"An error occurred while loading the pickle file: {e}")
+        return None, None
+
+def save_model_performance_result_to_file(performances_df_dictionary, execution_times):
+    filehandler = open('performances_ensembles.pkl', 'wb') 
+    pickle.dump((performances_df_dictionary, execution_times), filehandler)
+    filehandler.close()
+
+def load_model_performance_summary():
+    file_path = 'performances_ensembles.pkl'
+    try:
+        with open(file_path, 'rb') as file:
+            performances_df_dictionary, execution_times = pickle.load(file)
+        print("Object successfully loaded from pickle file:")
+        return performances_df_dictionary, execution_times
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+        return None, None
+    except Exception as e:
+        print(f"An error occurred while loading the pickle file: {e}")
+        return None, None
