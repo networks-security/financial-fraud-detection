@@ -3,8 +3,12 @@
 import React from "react";
 import { useTable, FilterDropdown } from "@refinedev/antd";
 import { Table, Input } from "antd";
+import { Refine } from "@refinedev/core";
+import { dataProvider } from "../providers/dataProvider";
+import { liveProvider } from "../providers/websocketDataProvider";
+import { TransactionsTableContents } from "./TransactionTableContents";
 
-interface Transaction {
+export interface Transaction {
   txFraud: boolean;
   txFraudScenario: number;
   transactionId: number;
@@ -18,70 +22,23 @@ interface Transaction {
 
 // NOTE: Sorting will work when we have a real API that provides the transaction data.
 const TransactionsTable: React.FC = () => {
-  // TODO: Uncomment and implement Data Provider, after the backend is done.
-  // const { tableProps } = useTable<Transaction>({
-  //   resource: "transactions",
-  //   filters: {
-  //     initial: [
-  //       {
-  //         field: "name",
-  //         operator: "contains",
-  //         value: "",
-  //       },
-  //     ],
-  //   },
-  // });
-
   return (
     <div style={{ padding: "4px" }}>
-      {/* Uncomment and replace with the next line, after the backend is done.
-      <Table {...tableProps} rowKey="id"> */}
-
-      <Table dataSource={sampleData} rowKey="transactionId">
-        <Table.Column
-          dataIndex="txFraud"
-          title="Fraud"
-          sorter={{ multiple: 1 }}
-          render={(value: boolean) => (
-            <span style={{ color: value ? "red" : "green", fontWeight: 600 }}>
-              {value ? "Fraud" : "Legit"}
-            </span>
-          )}
-        />
-        <Table.Column dataIndex="txFraudScenario" title="Fraud Scenario" />
-        <Table.Column dataIndex="transactionId" title="Transaction ID" />
-        <Table.Column
-          dataIndex="txDatetime"
-          title="Date/Time"
-          render={(value: Date) => new Date(value).toLocaleString()}
-          sorter={{ multiple: 2 }}
-        />
-        <Table.Column
-          dataIndex="customerId"
-          title="Customer ID"
-          filterDropdown={(props) => (
-            <FilterDropdown {...props}>
-              <Input placeholder="Search by ID" type="number" />
-            </FilterDropdown>
-          )}
-        />
-        <Table.Column dataIndex="terminalId" title="Terminal ID" />
-        <Table.Column
-          dataIndex="txAmount"
-          title="Amount"
-          sorter={{ multiple: 3 }}
-        />
-        <Table.Column
-          dataIndex="txTimeSeconds"
-          title="Time (seconds)"
-          sorter={{ multiple: 4 }}
-        />
-        <Table.Column
-          dataIndex="txTimeDays"
-          title="Time (days)"
-          sorter={{ multiple: 5 }}
-        />
-      </Table>
+      <Refine
+        dataProvider={dataProvider}
+        liveProvider={liveProvider}
+        options={{
+          liveMode: "auto", // automatically update tables
+        }}
+        resources={[
+          {
+            name: "transactions",
+            list: "/transactions",
+          },
+        ]}
+      >
+        <TransactionsTableContents />
+      </Refine>
     </div>
   );
 };

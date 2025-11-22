@@ -39,7 +39,11 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    // Additional Options
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   // Compile all .ts files in src only
   "include": ["src"]
