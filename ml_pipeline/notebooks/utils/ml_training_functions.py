@@ -410,3 +410,31 @@ def model_selection_wrapper_with_sample(transactions_df,
 
     # And return as a single DataFrame
     return performances_df
+
+def get_predict_proba(model, X_scaled):
+    if hasattr(model, "predict_proba"): # some models might not implement predict_proba
+        return model.predict_proba(X_scaled)[:, 1]
+    elif hasattr(model, "decision_function"):  # if model implement decision_function -> convert to probabilities via logistic/sigmoid
+        dec = model.decision_function(X_scaled)
+        return 1.0 / (1.0 + np.exp(-dec))  # sigmoid to convert to probability-like
+    else: # last resort: use predict (not recommended)
+        return model.predict(X_scaled).astype(float)
+
+def get_super_learner_prediction(transformed_transaction_df, load_model):
+    X = transformed_transaction_df[input_features].values
+    X_scaled = scaler.transform(X)
+
+    base_models = load_model['base_models']
+    meta_model = load_model['meta_model']
+    scaler = load_model['scaler']
+    input_features = load_model['input_features']
+
+    # Base model probabilities
+    probs_list = []
+    for _, model in base_models.items():
+        prob = get_predict_proba(model, X_scaled)
+        probs_list.append(prob)
+    meta_X = np.hstack(probs_list)
+
+    # Final prediction probability
+    return get_predict_proba(meta_model, meta_X)
