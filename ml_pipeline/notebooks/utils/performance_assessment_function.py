@@ -1,11 +1,14 @@
 from sklearn import metrics
 import pandas as pd
 import numpy as np
+from sklearn.metrics import roc_auc_score, average_precision_score
 
 import sys
 sys.path.append('./utils')  # make sure Python knows where to look
 
 import import_shared_functions as utils_import
+import ml_training_functions as utils_training
+
 
 def card_precision_top_k_day(df_day,top_k):
     
@@ -195,3 +198,20 @@ def rank_models(model_performances_list, metrics=None, weights=None):
     # ranking_df.insert(0, 'Rank', range(1, len(ranking_df) + 1))
     
     return ranking_df
+
+
+# for this function, the transactions_df_scorer must contain CUSTOMER_ID and TX_TIME_DAYS for the full df; X_index are the indices for the current test fold.
+def card_precision_top_k_wrapper(probs, X_index, transactions_df_scorer, k=100):
+    preds_df = transactions_df_scorer.loc[X_index].copy()
+    preds_df['predictions'] = probs
+    nb, per_day_list, mean_cp = utils_training.card_precision_top_k(preds_df, k)
+    return mean_cp
+
+def get_performance_metrics(df, y, probs, transactions_df_scorer):
+    auc = roc_auc_score(y, probs)
+    ap  = average_precision_score(y, probs)
+    cp = None
+    if transactions_df_scorer is not None:
+        cp = card_precision_top_k_wrapper(probs, df.index, transactions_df_scorer, k=100)
+        
+    return auc, ap, cp
