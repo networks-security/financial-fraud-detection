@@ -150,3 +150,4 @@ def transform_new_df(transactions_df):
     transactions_df=transactions_df.groupby('TERMINAL_ID').apply(lambda x: get_count_risk_rolling_window(x, delay_period=7, windows_size_in_days=[1,7,30], feature="TERMINAL_ID"))
     transactions_df=transactions_df.sort_values('TX_DATETIME').reset_index(drop=True)
 
+    return transactions_df

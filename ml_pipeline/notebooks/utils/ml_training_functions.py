@@ -15,7 +15,7 @@ import sys
 sys.path.append('./utils')  # make sure Python knows where to look
 
 import transform_data_functions as utils_transform_data
-import performance_assessment_function as utils_ml_assessment
+import performance_assessment_function as utils_assessment
 
 # NumPy compatibility patch for deprecated np.int (removed in NumPy 1.20+)
 # This fixes issues with older libraries like mlens that use deprecated aliases
