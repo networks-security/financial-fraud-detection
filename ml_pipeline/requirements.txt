@@ -12,3 +12,7 @@ lightgbm
 catboost
 mlens
 imbalanced-learn
+shap
+optuna
+isolated-forest
+joblib

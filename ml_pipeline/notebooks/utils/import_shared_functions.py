@@ -38,26 +38,19 @@ import json
 import datetime
 import random
 
-# NumPy compatibility patch for deprecated np.int (removed in NumPy 1.20+)
-# This fixes issues with older libraries like mlens that use deprecated aliases
-if not hasattr(np, 'int'):
-    np.int = np.int64
-    np.float = np.float64
-    np.complex = np.complex128
-    np.object = np.object_
-    np.str = np.str_
-    np.long = np.int64
-    np.unicode = np.str_
-
 #import sklearn
 import sklearn
 from sklearn import *
 
-# Only enable matplotlib inline in Jupyter notebooks (when get_ipython is available)
+# Safely enable inline matplotlib only if running inside an IPython environment
 try:
-    get_ipython().run_line_magic('matplotlib', 'inline')
-except NameError:
-    # get_ipython() is not defined in multiprocessing worker processes or non-Jupyter environments
+    from IPython import get_ipython
+    _ip = get_ipython()
+    if _ip is not None:
+        _ip.run_line_magic('matplotlib', 'inline')
+except Exception:
+    # In a pure Python execution context (e.g. batch script) get_ipython is absent;
+    # we silently skip enabling the inline backend.
     pass
 
 import matplotlib
