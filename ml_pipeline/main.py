@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     if load_model == None:
         FOLDER_PATH = "./notebooks/models"
-        FILE_PATH = FOLDER_PATH + "/super_learner_model.pkl"
+        FILE_PATH = FOLDER_PATH + "/super_learner_model_iso_forest.pkl"
 
         if not os.path.isdir(FOLDER_PATH):
             raise NotADirectoryError(f"Error: The folder '{FOLDER_PATH}' does not exist.")
