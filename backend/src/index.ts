@@ -3,6 +3,7 @@ import express, { type Express } from "express";
 import http from "http";
 import { initializeSocketIO } from "./core/ws-server.js";
 import dashboardRoutes from "./features/dashboard/dashboard.routes.ts";
+import transactionsRoutes from "./features/transactions/transactions.routes.ts";
 import cors from "cors";
 
 const app: Express = express();
@@ -21,6 +22,7 @@ app.use(express.json());
 
 // Register API Routes
 app.use("/", dashboardRoutes);
+app.use("/transaction", transactionsRoutes);
 
 // Setup HTTP server
 const httpServer = http.createServer(app);

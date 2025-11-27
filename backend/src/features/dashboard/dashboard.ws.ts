@@ -1,9 +1,15 @@
 import { getIO } from "../../core/ws-server.js";
-import { type ProcessedTransaction } from "../../core/fraud-analysis/fraud-analysis.types.js";
 
-export function pushProcessedTransactionToWebSocketClient(
-  processedTransaction: ProcessedTransaction,
-  _ioClientId: string // TODO: implement when user auth is done
+export function pushNotificationViaWebsocket(
+  ioClientId: string // TODO: implement when user auth is done
 ) {
-  getIO().emit("newTransaction", processedTransaction);
+  if (!ioClientId) {
+    // TODO: auth check
+    console.log("Unauthorized user");
+    return;
+  }
+  console.log("Pushing a notification to the ws client with id, ", ioClientId);
+  getIO().emit("resources/transactions", {
+    type: "created",
+  });
 }
