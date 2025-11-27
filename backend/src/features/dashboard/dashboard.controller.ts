@@ -1,4 +1,4 @@
-import { type Transaction } from "./dashboard.types.ts";
+import { type ProcessedTransaction } from "./dashboard.types.ts";
 import { type Request, type Response } from "express";
 
 export async function getTransactions(_req: Request, res: Response) {
@@ -8,9 +8,9 @@ export async function getTransactions(_req: Request, res: Response) {
 
   // TODO: fetch for specific userId
 
-  const sampleData: Transaction[] = [
+  const sampleData: ProcessedTransaction[] = [
     {
-      transactionId: 1,
+      transactionId: 101,
       txDatetime: new Date("2025-11-08T11:30:00"),
       customerId: 105,
       terminalId: 6,

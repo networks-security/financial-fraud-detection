@@ -1,4 +1,4 @@
-export interface Transaction {
+export interface ProcessedTransaction {
   txFraud: boolean;
   txFraudScenario: number;
   transactionId: number;
