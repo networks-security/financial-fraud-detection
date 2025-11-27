@@ -16,7 +16,10 @@ export interface Transaction {
 }
 
 export const TransactionsTableContents: React.FC = () => {
-  const { tableProps } = useTable<Transaction>({ resource: "transactions" });
+  const { tableProps } = useTable<Transaction>({
+    resource: "transactions",
+    pagination: { mode: "off" },
+  });
 
   return (
     <Table {...tableProps} rowKey="transactionId">
