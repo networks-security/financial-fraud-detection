@@ -5,7 +5,7 @@ import json
 import pandas as pd
 
 sys.path.append('./notebooks')
-sys.path.append('./notebooks/models')
+sys.path.append('./notebooks/saved_models')
 sys.path.append('./notebooks/utils')
 
 import transform_data_functions as utils_transform
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     load_model = None
 
     if load_model == None:
-        FOLDER_PATH = "./notebooks/models"
+        FOLDER_PATH = "./notebooks/saved_models"
         FILE_PATH = FOLDER_PATH + "/super_learner_model_iso_forest.pkl"
 
         if not os.path.isdir(FOLDER_PATH):
