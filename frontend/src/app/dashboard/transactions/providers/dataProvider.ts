@@ -16,9 +16,9 @@ export const dataProvider: DataProvider = {
   getList: async <TData extends BaseRecord = BaseRecord>(
     params: GetListParams
   ): Promise<GetListResponse<TData>> => {
-    console.log("Fetching transaction:", params);
+    console.log("Fetching transactions, params:", params);
     const result = await rest.getList<TData>(params);
-    console.log("Fetched transactions:", result.data);
+    console.log("Successfully fetched transactions:", result.data);
     return result;
   },
 };

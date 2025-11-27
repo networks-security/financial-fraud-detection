@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { useTable, FilterDropdown } from "@refinedev/antd";
-import { Table, Input } from "antd";
 import { Refine } from "@refinedev/core";
 import { dataProvider } from "../providers/dataProvider";
 import { liveProvider } from "../providers/websocketDataProvider";

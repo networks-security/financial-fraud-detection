@@ -8,22 +8,38 @@ export const socket = io(WS_URL, {
 });
 
 export const liveProvider: LiveProvider = {
-  subscribe: ({ channel, callback }): { unsubscribe: () => void } => {
+  subscribe: ({ channel, callback }) => {
+    if (!channel.startsWith("resources/")) {
+      return { unsubscribe: () => {} };
+    }
+
     const handler = (event: any) => {
       const liveEvent: LiveEvent = {
         channel,
-        type: event.type ?? "updated", // refine requires a type
-        payload: event.payload,
-        date: new Date(),
+        type: event.type ?? "created",
+        payload: event.payload ?? event,
+        date: new Date(event.date ?? Date.now()),
       };
-
       callback(liveEvent);
     };
 
     socket.on(channel, handler);
 
+    // Optional: log when actually connected
+    if (socket.connected) {
+      console.log("Live subscribed to:", channel);
+    } else {
+      socket.once("connect", () => {
+        console.log("WebSocket connected — Live subscribed to:", channel);
+      });
+    }
+
     return {
-      unsubscribe: () => socket.off(channel, handler),
+      unsubscribe: () => {
+        console.log("Unsubscribing...");
+        socket.off(channel, handler);
+        // Optional: disconnect if no listeners left
+      },
     };
   },
 
