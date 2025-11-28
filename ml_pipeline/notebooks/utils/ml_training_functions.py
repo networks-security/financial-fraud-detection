@@ -421,19 +421,28 @@ def get_predict_proba(model, X_scaled):
         return model.predict(X_scaled).astype(float)
 
 def get_super_learner_prediction(transformed_transaction_df, load_model):
-    X = transformed_transaction_df[input_features].values
-    X_scaled = scaler.transform(X)
-
     base_models = load_model['base_models']
     meta_model = load_model['meta_model']
     scaler = load_model['scaler']
     input_features = load_model['input_features']
+    
+    X = transformed_transaction_df[input_features].values
+    X_scaled = scaler.transform(X)
+
+    # Add a dummy 16th feature to match model training if input_features only has 15 (but base models were trained with 16 features)
+    first_model = next(iter(base_models.values()))
+    if hasattr(first_model, 'n_features_in_'):
+        expected_features = first_model.n_features_in_
+        if X_scaled.shape[1] < expected_features:
+            # Add dummy columns filled with 0
+            dummy_cols = np.zeros((X_scaled.shape[0], expected_features - X_scaled.shape[1]))
+            X_scaled = np.hstack([X_scaled, dummy_cols])
 
     # Base model probabilities
     probs_list = []
     for _, model in base_models.items():
         prob = get_predict_proba(model, X_scaled)
-        probs_list.append(prob)
+        probs_list.append(prob.reshape(-1, 1))
     meta_X = np.hstack(probs_list)
 
     # Final prediction probability
