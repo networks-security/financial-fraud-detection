@@ -5,6 +5,9 @@ import { initializeSocketIO } from "./core/ws-server.js";
 import dashboardRoutes from "./features/dashboard/dashboard.routes.ts";
 import transactionsRoutes from "./features/transactions/transactions.routes.ts";
 import cors from "cors";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 4000;
