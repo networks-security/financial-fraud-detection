@@ -1,0 +1,3 @@
+firebase_admin
+cryptography
+google.cloud.firestore_v1

@@ -49,3 +49,7 @@ tmp/
 
 # Miscellaneous
 .DS_Store
+
+# Keys
+*.pem
+src/fraud-detection-52ca2-firebase-adminsdk-fbsvc-b77f6e51e6.json
