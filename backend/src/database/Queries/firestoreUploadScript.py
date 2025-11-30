@@ -9,10 +9,6 @@ from google.cloud.firestore_v1 import Query
 import sys
 import json
 
-# fraudlisttxt = db.collection('fraudlist').document('3')
-# txt = [b'123', b'3124', b'12314', b'29/3/2024', b'1231', b'44333', b'90.00', b'2313', b'89']
-# txt = [b'5646', b'3454', b'5378', b'29/3/2014', b'2346', b'89998', b'989.00', b'4323', b'45']
-
 # Getting JSON array from script call arg
 if len(sys.argv) > 1:
     fileName = sys.argv[1]
@@ -38,12 +34,12 @@ def createPrivateKey():
         format=serialization.PrivateFormat.TraditionalOpenSSL,
         encryption_algorithm=serialization.BestAvailableEncryption(b"NetworkSecurity")
     )
-    with open("src/private_key_encrypted.pem", "wb") as f:
+    with open("src/database/private_key_encrypted.pem", "wb") as f:
         f.write(pem)
 
 # Loading a private key
 def getPrivateKey():
-    private_key_path = "src/private_key_encrypted.pem"
+    private_key_path = "src/database/private_key_encrypted.pem"
     with open(private_key_path, "rb") as key_file:
         private_key_data = key_file.read()
     password = b"NetworkSecurity"
@@ -61,7 +57,7 @@ def getPublicKeyFromPrivateKey():
 
 # getting firebase client
 def getClient():
-    cred = credentials.Certificate('src/fraud-detection-52ca2-firebase-adminsdk-fbsvc-b77f6e51e6.json')
+    cred = credentials.Certificate('src/database/fraud-detection-52ca2-firebase-adminsdk-fbsvc-b77f6e51e6.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     return db

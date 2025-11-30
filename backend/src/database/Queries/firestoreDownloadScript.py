@@ -9,7 +9,7 @@ import sys
 import json
 
 def getPrivateKey():
-    private_key_path = "src/private_key_encrypted.pem"
+    private_key_path = "src/database/private_key_encrypted.pem"
     with open(private_key_path, "rb") as key_file:
         private_key_data = key_file.read()
     password = b"NetworkSecurity"
@@ -21,7 +21,7 @@ def getPrivateKey():
     return privateKeyAcquired
 
 def getClient():
-    cred = credentials.Certificate('src/fraud-detection-52ca2-firebase-adminsdk-fbsvc-b77f6e51e6.json')
+    cred = credentials.Certificate('src/database/fraud-detection-52ca2-firebase-adminsdk-fbsvc-b77f6e51e6.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     return db
