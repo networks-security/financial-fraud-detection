@@ -58,7 +58,10 @@ def get_customer_spending_behaviour_features(customer_transactions, windows_size
     return customer_transactions
 
 
-def get_count_risk_rolling_window(terminal_transactions, delay_period=7, windows_size_in_days=[1,7,30], feature="TERMINAL_ID"):
+def get_count_risk_rolling_window(terminal_transactions, delay_period=7, windows_size_in_days=[1,7,30], feature="TERMINAL_ID", isTestSet = False, hideTXFraud = False):
+    
+    if (isTestSet and hideTXFraud):
+        hide_TX_FRAUD_for_test_df(terminal_transactions)
     
     terminal_transactions=terminal_transactions.sort_values('TX_DATETIME')
     
@@ -84,6 +87,20 @@ def get_count_risk_rolling_window(terminal_transactions, delay_period=7, windows
     
     # Replace NA values with 0 (all undefined risk scores where NB_TX_WINDOW is 0) 
     terminal_transactions.fillna(0,inplace=True)
+    
+    return terminal_transactions
+
+# For test set, preserve true labels but hide them from the model.
+# The model should not see TX_FRAUD or TX_FRAUD_SCENARIO values.
+def hide_TX_FRAUD_for_test_df(terminal_transactions):
+    # Preserve true fraud labels
+    if 'TX_FRAUD' in terminal_transactions.columns:
+        terminal_transactions['TRUE_FRAUD'] = terminal_transactions['TX_FRAUD']
+        terminal_transactions['TX_FRAUD'] = 0  # Hide fraud labels from model
+    
+    if 'TX_FRAUD_SCENARIO' in terminal_transactions.columns:
+        terminal_transactions['TRUE_FRAUD_SCENARIO'] = terminal_transactions['TX_FRAUD_SCENARIO']
+        terminal_transactions['TX_FRAUD_SCENARIO'] = 0  # Hide scenario from model
     
     return terminal_transactions
 
@@ -134,7 +151,7 @@ def get_train_test_set(transactions_df, start_date_training, delta_train=7, delt
     
     return (train_df, test_df)
 
-def transform_new_df(transactions_df):
+def transform_new_df(transactions_df, isTestSet = False, hideTXFraud = False):
     # Determind if the transaction is occured during weekend
     transactions_df['TX_DURING_WEEKEND']=transactions_df.TX_DATETIME.apply(is_weekend)
     
@@ -147,7 +164,7 @@ def transform_new_df(transactions_df):
 
     # get_count_risk_rolling_window(transactions_df[transactions_df.TERMINAL_ID==3059], delay_period=7, windows_size_in_days=[1,7,30])
 
-    transactions_df=transactions_df.groupby('TERMINAL_ID').apply(lambda x: get_count_risk_rolling_window(x, delay_period=7, windows_size_in_days=[1,7,30], feature="TERMINAL_ID"))
+    transactions_df=transactions_df.groupby('TERMINAL_ID').apply(lambda x: get_count_risk_rolling_window(x, delay_period=7, windows_size_in_days=[1,7,30], feature="TERMINAL_ID", isTestSet=isTestSet, hideTXFraud=hideTXFraud))
     transactions_df=transactions_df.sort_values('TX_DATETIME').reset_index(drop=True)
 
     return transactions_df
