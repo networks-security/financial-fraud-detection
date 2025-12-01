@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .form-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #555;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            margin-top: 25px;
+            background-color: black;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Example Bank Transaction Form</h1>
+        <form id="transactionForm" action="/submit-data" method="POST">
+            <label for="transactionId">Transaction ID:</label>
+            <input type="text" id="transactionId" name="transactionId" required>
+
+            <label for="txDatetime">Transaction Date & Time:</label>
+            <input type="datetime-local" id="txDatetime" name="txDatetime" required>
+
+            <label for="customerId">Customer ID:</label>
+            <input type="text" id="customerId" name="customerId" required>
+
+            <label for="terminalId">Terminal ID:</label>
+            <input type="text" id="terminalId" name="terminalId" required>
+
+            <label for="txAmount">Transaction Amount:</label>
+            <input type="number" id="txAmount" name="txAmount" step="0.01" min="0" required>
+
+            <label for="txTimeSeconds">Transaction Time (Seconds):</label>
+            <input type="number" id="txTimeSeconds" name="txTimeSeconds" min="0" required>
+
+            <label for="txTimeDays">Transaction Time (Days):</label>
+            <input type="number" id="txTimeDays" name="txTimeDays" min="0" required>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+        document.getElementById('transactionForm').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+
+            const formData = new FormData(this);
+            const jsonData = {};
+
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            const jsonString = JSON.stringify(jsonData);
+
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transaction_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
