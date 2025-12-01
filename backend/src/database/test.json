@@ -1,0 +1,11 @@
+{
+      "transactionId": 101092,
+      "txDatetime": "2025-11-08T11:30:00",
+      "customerId": 105,
+      "terminalId": 6,
+      "txAmount": 30.89,
+      "txTimeSeconds": 4690,
+      "txTimeDays": 5,
+      "txFraud": false,
+      "txFraudScenario": 0
+}

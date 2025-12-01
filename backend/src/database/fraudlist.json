@@ -1,0 +1,26 @@
+[
+    {
+        "txFraud": "False",
+        "txFraudScenario": "0",
+        "transactionId": "101092",
+        "txDatetime": "2025-11-08T11:30:00",
+        "customerId": "105",
+        "terminalId": "6",
+        "txAmount": "30.89",
+        "txTimeSeconds": "4690",
+        "txTimeDays": "5",
+        "id": "3"
+    },
+    {
+        "txFraud": "False",
+        "txFraudScenario": "0",
+        "transactionId": "101092",
+        "txDatetime": "2025-11-08T11:30:00",
+        "customerId": "105",
+        "terminalId": "6",
+        "txAmount": "30.89",
+        "txTimeSeconds": "4690",
+        "txTimeDays": "5",
+        "id": "4"
+    }
+]
