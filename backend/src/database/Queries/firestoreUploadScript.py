@@ -97,6 +97,7 @@ def postList(txtlist, db):
     'txAmount': encrypt(txtlist["txAmount"]),
     'txTimeSeconds': encrypt(txtlist["txTimeSeconds"]),
     'txTimeDays': encrypt(txtlist["txTimeDays"]),
+    'userId': encrypt(txtlist["userId"]),
     'txID': num,
     })
 

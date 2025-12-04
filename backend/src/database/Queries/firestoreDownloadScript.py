@@ -57,6 +57,7 @@ def fetchData(db, privateKey):
             'txAmount': decrypt(docData["txAmount"], privateKey),
             'txTimeSeconds': decrypt(docData["txTimeSeconds"], privateKey),
             'txTimeDays': decrypt(docData["txTimeDays"], privateKey),
+            'userID': decrypt(docData["userID"], privateKey)
             }
         docDataDecrypted['id'] = doc.id 
         data.append(docDataDecrypted)

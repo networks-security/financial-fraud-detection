@@ -7,5 +7,6 @@
       "txTimeSeconds": 4690,
       "txTimeDays": 5,
       "txFraud": false,
-      "txFraudScenario": 0
+      "txFraudScenario": 0,
+      "userID": "example@gmail.com"
 }
