@@ -16,6 +16,7 @@ if len(sys.argv) > 1:
         with open(fileName, 'r') as file:
             array = json.load(file)
         txt = array
+        # txt = fileName
         print(f"Received array in Python from file: {txt}")
     except FileNotFoundError:
         print("Error: 'data.json' not found.")
@@ -57,7 +58,7 @@ def getPublicKeyFromPrivateKey():
 
 # getting firebase client
 def getClient():
-    cred = credentials.Certificate('src/database/fraud-detection-52ca2-firebase-adminsdk-fbsvc-b77f6e51e6.json')
+    cred = credentials.Certificate('src/database/fraud-detection-52ca2-firebase-adminsdk-fbsvc-3a443d56ce.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     return db
