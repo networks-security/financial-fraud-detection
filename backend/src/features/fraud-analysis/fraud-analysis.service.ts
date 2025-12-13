@@ -37,12 +37,11 @@ export default class FraudAnalysisService {
         }
       );
 
-      console.log(stdout);
-      const transactionFraudScore = Number.parseInt(stdout);
-
-      // Temp
+      const jsonMlResult = JSON.parse(stdout);
+      const transactionFraudScore = jsonMlResult["fraud_probability"];
       let boolTransactionFraudScore = true;
-      if (transactionFraudScore == 0) boolTransactionFraudScore = false;
+      if (transactionFraudScore < 0.5) boolTransactionFraudScore = false;
+      else boolTransactionFraudScore = true;
 
       // Success
       return transformTransactionIntoProcessedTransaction(

@@ -6,6 +6,7 @@ import dashboardRoutes from "./features/dashboard/dashboard.routes.ts";
 import transactionsRoutes from "./features/transactions/transactions.routes.ts";
 import cors from "cors";
 import * as dotenv from "dotenv";
+import { ddosMiddleware } from "./core/middleware/anti-ddos.middleware.ts";
 
 dotenv.config();
 
@@ -22,6 +23,9 @@ app.use(
 
 // Middleware to parse JSON request body
 app.use(express.json());
+
+// Apply DDoS middleware globally
+app.use(ddosMiddleware);
 
 // Register API Routes
 app.use("/", dashboardRoutes);
