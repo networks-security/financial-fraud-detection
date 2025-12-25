@@ -14,5 +14,7 @@ mlens
 imbalanced-learn
 shap
 optuna
-isolated-forest
 joblib
+celery
+fastapi
+uvicorn

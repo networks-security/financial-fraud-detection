@@ -1,0 +1,4 @@
+.env
+*__pycache__
+*pyenv
+*.DS_Store
