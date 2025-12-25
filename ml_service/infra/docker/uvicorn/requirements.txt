@@ -1,0 +1,9 @@
+fastapi
+pydantic
+uvicorn
+dateparser
+celery==5.2.7
+kombu==5.2.4
+billiard==3.6.4.0
+vine==5.0.0
+redis==4.5.5
