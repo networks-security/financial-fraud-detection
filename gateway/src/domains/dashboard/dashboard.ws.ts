@@ -1,4 +1,4 @@
-import { getIO } from "../../core/ws-server.js";
+import { getIO } from "../../infra/websockets/ws-server.js";
 
 export function pushNotificationViaWebsocket(
   ioClientId: string // TODO: implement when user auth is done

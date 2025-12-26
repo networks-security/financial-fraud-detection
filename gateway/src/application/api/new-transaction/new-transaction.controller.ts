@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
-import { pushNotificationViaWebsocket } from "../dashboard/dashboard.ws.ts";
-import { type Transaction } from "./transactions.types.ts";
-import FraudAnalysisService from "../fraud-analysis/fraud-analysis.service.ts";
+import { pushNotificationViaWebsocket } from "../../../core/shared/utils/push-notification-via-websocket.ts";
+import { type Transaction } from "../../../core/new-transaction/schemas/transactions.types.ts";
+import FraudAnalysisService from "../../../core/new-transaction/services/fraud-analysis.service.ts";
 
 /**
  * This endpoint handler receives requests from the banking application.

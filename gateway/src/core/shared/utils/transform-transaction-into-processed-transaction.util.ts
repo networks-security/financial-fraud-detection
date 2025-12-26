@@ -1,4 +1,4 @@
-import { type Transaction } from "../../features/transactions/transactions.types.ts";
+import { type Transaction } from "../../new-transaction/schemas/transactions.types.ts";
 import { type ProcessedTransaction } from "../../features/dashboard/dashboard.types.ts";
 
 export function transformTransactionIntoProcessedTransaction(

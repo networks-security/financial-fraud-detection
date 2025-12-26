@@ -1,12 +1,12 @@
 import express, { type Express } from "express";
 // TODO: switch to HTTPS server later
 import http from "http";
-import { initializeSocketIO } from "./core/ws-server.js";
+import { initializeSocketIO } from "../websockets/ws-server.ts";
 import dashboardRoutes from "./features/dashboard/dashboard.routes.ts";
-import transactionsRoutes from "./features/transactions/transactions.routes.ts";
+import transactionsRoutes from "../../core/new-transaction/transactions.routes.ts";
 import cors from "cors";
 import * as dotenv from "dotenv";
-import { ddosMiddleware } from "./core/middleware/anti-ddos.middleware.ts";
+import { ddosMiddleware } from "../../application/api/middleware/anti-ddos.middleware.ts";
 
 dotenv.config();
 
