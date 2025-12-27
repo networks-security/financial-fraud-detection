@@ -11,9 +11,11 @@
     "dev": "npx tsx watch src/index.ts",
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",
-    "format": "prettier --write \"**/*.{js,ts,json,md}\""
+    "format": "prettier --write \"**/*.{js,ts,json,md}\"",
+    "test": "jest"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.28.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jiti": "^2.6.1",
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/express": "^5.0.5",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "@types/socket.io": "^3.0.1",
     "eslint": "^9.39.1",
@@ -30,6 +33,7 @@
     "globals": "^16.5.0",
     "jest": "^30.2.0",
     "prettier": "^3.6.2",
+    "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0"
