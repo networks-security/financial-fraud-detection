@@ -1,0 +1,35 @@
+name: Gateway CI
+
+on:
+  push:
+    paths:
+      - "gateway/**"
+
+jobs:
+  build:
+    name: Gateway CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load repository code
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ vars.NODE_VERSION || '25' }}
+
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: gateway/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/gateway/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: gateway
+
+      - name: Run Jest tests
+        run: npm run test
+        working-directory: gateway
