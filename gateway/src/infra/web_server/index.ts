@@ -2,8 +2,8 @@ import express, { type Express } from "express";
 // TODO: switch to HTTPS server later
 import http from "http";
 import { initializeSocketIO } from "../websockets/ws-server.ts";
-import dashboardRoutes from "./features/dashboard/dashboard.routes.ts";
-import transactionsRoutes from "../../core/new-transaction/transactions.routes.ts";
+import dashboardRoutes from "../../application/api/analyzed-transaction/analyzed-transaction.routes.ts";
+import transactionsRoutes from "../../application/api/new-transaction/new-transaction.routes.ts";
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { ddosMiddleware } from "../../application/api/middleware/anti-ddos.middleware.ts";

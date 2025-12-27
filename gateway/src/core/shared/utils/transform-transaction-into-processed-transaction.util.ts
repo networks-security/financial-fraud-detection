@@ -1,5 +1,5 @@
 import { type Transaction } from "../../new-transaction/schemas/transactions.types.ts";
-import { type ProcessedTransaction } from "../../features/dashboard/dashboard.types.ts";
+import { type ProcessedTransaction } from "../../analyzed-transaction/schemas/analyzed-transaction.types.ts";
 
 export function transformTransactionIntoProcessedTransaction(
   transaction: Transaction,
