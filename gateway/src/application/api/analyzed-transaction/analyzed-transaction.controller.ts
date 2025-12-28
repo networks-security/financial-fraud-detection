@@ -1,4 +1,4 @@
-import { type ProcessedTransaction } from "./dashboard.types.ts";
+import { type ProcessedTransaction } from "../../../core/analyzed-transaction/schemas/analyzed-transaction.types.ts";
 import { type Request, type Response } from "express";
 
 export async function getTransactions(_req: Request, res: Response) {

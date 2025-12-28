@@ -1,6 +1,6 @@
-import { transformTransactionIntoProcessedTransaction } from "../../core/utils/transform-transaction-into-processed-transaction.util.ts";
-import type { ProcessedTransaction } from "../dashboard/dashboard.types.ts";
-import type { Transaction } from "../transactions/transactions.types.ts";
+import { transformTransactionIntoProcessedTransaction } from "../../shared/utils/transform-transaction-into-processed-transaction.util.ts";
+import type { ProcessedTransaction } from "../../analyzed-transaction/schemas/analyzed-transaction.types.ts";
+import type { Transaction } from "../schemas/transactions.types.ts";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 
