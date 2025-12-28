@@ -69,7 +69,7 @@ const config: Config = {
   // A set of global variables that need to be available in all test environments
   globals: {
     "ts-jest": {
-      allowImportingTsExtentions: true,
+      allowImportingTsExtensions: true,
       tsconfig: "<rootDir>/tsconfig.jest.json",
     },
   },
