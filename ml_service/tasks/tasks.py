@@ -1,6 +1,5 @@
 import sys
 import os
-import celery
 
 
 from ml_service.core.services.analyze_transaction_service import (
